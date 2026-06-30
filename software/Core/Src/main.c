@@ -30,7 +30,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "st7789.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
