@@ -3,7 +3,6 @@
 //
 
 #include "key.h"
-#include "stm32g4xx_ll_gpio.h"
 
 Key key_1,key_2;
 
@@ -11,7 +10,7 @@ Key key_1,key_2;
 void Key_Init(Key* key,GPIO_TypeDef* GPIOx,uint16_t GPIO_Pin){
      key->GPIOx = GPIOx;
      key->GPIO_Pin = GPIO_Pin;
-     key->last_state = LL_GPIO_IsInputPinSet(GPIOx, GPIO_Pin);
+     key->last_state = VELIX_GPIO_IS_SET(GPIOx, GPIO_Pin);
      key->press_cnt = 0;
      key->release_cnt = 0;
      key->click_count = 0;
@@ -22,7 +21,7 @@ void Key_Init(Key* key,GPIO_TypeDef* GPIOx,uint16_t GPIO_Pin){
 //按键扫描
 void Key_Scan(Key* key){
 
-    bool current = (LL_GPIO_IsInputPinSet(key->GPIOx,key->GPIO_Pin) != 1);//低电平按下
+    bool current = (VELIX_GPIO_IS_SET(key->GPIOx, key->GPIO_Pin) != 1);//低电平按下
 
     if(current){
         //按下

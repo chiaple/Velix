@@ -11,6 +11,7 @@
 #include "spi.h"
 #include "tim.h"
 #include "usart.h"
+#include "stm32g4xx_ll_gpio.h"
 
 //=============================Board mapping==============================
 // Keep CubeMX-generated names here. USER modules should prefer VELIX_* names
@@ -66,6 +67,9 @@
 
 #define VELIX_LED_OFF(port, pin) \
     HAL_GPIO_WritePin((port), (pin), GPIO_PIN_SET)
+
+#define VELIX_GPIO_IS_SET(port, pin) \
+    LL_GPIO_IsInputPinSet((port), (pin))
 
 #define VELIX_PWM_SET_U(compare) \
     __HAL_TIM_SET_COMPARE(&VELIX_PWM_TIM, VELIX_PWM_U_CHANNEL, (compare))

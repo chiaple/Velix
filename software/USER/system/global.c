@@ -21,9 +21,6 @@ volatile uint32_t sys_tick_ms = 0;          // 每1ms +1
 volatile uint32_t task_counter = 0;         // 用于分频
 static volatile uint8_t vofa_send_flag = 0;
 
-extern DMA_HandleTypeDef hdma_usart3_rx;
-
-
 MotorSystem Mt;
 
 

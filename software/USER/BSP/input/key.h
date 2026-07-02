@@ -6,7 +6,7 @@
 #define SPIN_MASTER_V2_KEY_H
 
 #include <stdbool.h>
-#include "stm32g431xx.h"
+#include "config.h"
 
 #define KEY_SCAN_PERIOD     10
 #define KEY_LONG_TIME       500 / KEY_SCAN_PERIOD
