@@ -2,7 +2,6 @@
 #include "FOC.h"
 #include "config.h"
 #include "arm_math.h"
-#include "usart.h"
 #include "tone_presets.h"
 
 // 一个非常简单的实现：在 q 轴电压 Uq 上叠加一个正弦波，用以驱动电机产生声音。

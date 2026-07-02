@@ -7,8 +7,8 @@
 #include "global.h"
 #include "serial_commands.h"
 
-#if (COMM_UART_PORT != 1) && (COMM_UART_PORT != 3)
-#error "COMM_UART_PORT must be 1 or 3"
+#if (VELIX_COMM_UART_PORT != 1) && (VELIX_COMM_UART_PORT != 3)
+#error "VELIX_COMM_UART_PORT must be 1 or 3"
 #endif
 
 uint8_t serial_dma_rx_buf[RX_BUF_SIZE]; // DMA 循环接收缓冲区
@@ -22,11 +22,7 @@ static uint8_t vofa_tx_buf[VOFA_FRAME_BYTES(VOFA_MAX_CH_COUNT)];
 
 UART_HandleTypeDef *Serial_GetCommUart(void)
 {
-#if COMM_UART_PORT == 1
-    return &huart1;
-#else
-    return &huart3;
-#endif
+    return &VELIX_COMM_UART_HANDLE;
 }
 
 void Serial_HandleIdleIRQ(UART_HandleTypeDef *huart)

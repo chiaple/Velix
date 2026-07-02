@@ -4,12 +4,8 @@
 
 #ifndef SPIN_MASTER_V2_MT6701_H
 #define SPIN_MASTER_V2_MT6701_H
-#include "gpio.h"
 #include "arm_math.h"
-
-
-#define MT6701_CS_LOW   HAL_GPIO_WritePin(Encoder_CS_GPIO_Port, Encoder_CS_Pin, GPIO_PIN_RESET)
-#define MT6701_CS_HIGH  HAL_GPIO_WritePin(Encoder_CS_GPIO_Port, Encoder_CS_Pin, GPIO_PIN_SET)
+#include "config.h"
 
 /*typedef struct {
     int			motorNum;

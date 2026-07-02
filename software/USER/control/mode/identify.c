@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include "identify.h"
 #include "global.h"
-#include "usart.h"
 
 /**
   * 电机参数识别

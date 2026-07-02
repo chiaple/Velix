@@ -4,7 +4,6 @@
 
 #ifndef SPIN_MASTER_V2_SERIAL_H
 #define SPIN_MASTER_V2_SERIAL_H
-#include "usart.h"
 
 #include "config.h"
 

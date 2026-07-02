@@ -1,18 +1,18 @@
 #include "key_actions.h"
-#include "main.h"
+#include "config.h"
 
 void SingleClickAction(void) {
-    HAL_GPIO_WritePin(LED_R_GPIO_Port, LED_R_Pin, GPIO_PIN_SET);
-    HAL_GPIO_WritePin(LED_G_GPIO_Port, LED_G_Pin, GPIO_PIN_SET);
-    HAL_GPIO_WritePin(LED_B_GPIO_Port, LED_B_Pin, GPIO_PIN_SET);
+    VELIX_LED_OFF(VELIX_LED_R_GPIO_Port, VELIX_LED_R_Pin);
+    VELIX_LED_OFF(VELIX_LED_G_GPIO_Port, VELIX_LED_G_Pin);
+    VELIX_LED_OFF(VELIX_LED_B_GPIO_Port, VELIX_LED_B_Pin);
 }
 
 void DoubleClickAction(void) {
-    HAL_GPIO_WritePin(LED_R_GPIO_Port, LED_R_Pin, GPIO_PIN_RESET);
+    VELIX_LED_ON(VELIX_LED_R_GPIO_Port, VELIX_LED_R_Pin);
 }
 
 void LongPressAction(void) {
-    HAL_GPIO_WritePin(LED_R_GPIO_Port, LED_R_Pin, GPIO_PIN_RESET);
-    HAL_GPIO_WritePin(LED_G_GPIO_Port, LED_G_Pin, GPIO_PIN_RESET);
-    HAL_GPIO_WritePin(LED_B_GPIO_Port, LED_B_Pin, GPIO_PIN_RESET);
+    VELIX_LED_ON(VELIX_LED_R_GPIO_Port, VELIX_LED_R_Pin);
+    VELIX_LED_ON(VELIX_LED_G_GPIO_Port, VELIX_LED_G_Pin);
+    VELIX_LED_ON(VELIX_LED_B_GPIO_Port, VELIX_LED_B_Pin);
 }

@@ -5,7 +5,6 @@
 #include "FOC.h"
 #include "config.h"
 #include "global.h"
-#include "tim.h"
 
 /**----------------------------------------------------
 
@@ -196,8 +195,8 @@ void setSVPWM(const int motorNum, const float32_t Uq, const float32_t Ud, const 
 
     if (motorNum == 0) {
         const SVPWM motor_OUT = CalculateSVPWM(&Mt.foc, Uq, Ud, eAngle);
-        __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, (uint32_t)motor_OUT.Tim_cmpU);
-        __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, (uint32_t)motor_OUT.Tim_cmpV);
-        __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, (uint32_t)motor_OUT.Tim_cmpW);
+        VELIX_PWM_SET_U((uint32_t)motor_OUT.Tim_cmpU);
+        VELIX_PWM_SET_V((uint32_t)motor_OUT.Tim_cmpV);
+        VELIX_PWM_SET_W((uint32_t)motor_OUT.Tim_cmpW);
     }
 }

@@ -2,14 +2,14 @@
 #ifndef SPIN_MASTER_V2_LED_TASK_H
 #define SPIN_MASTER_V2_LED_TASK_H
 
-#include "main.h"
+#include "config.h"
 
 
 // ────────────────────────────────────────────────
 //  GPIO 操作宏（你的共阳极定义：低电平点亮）
 // ────────────────────────────────────────────────
-#define LED_ON(port, pin)   HAL_GPIO_WritePin(port, pin, GPIO_PIN_RESET)
-#define LED_OFF(port, pin)  HAL_GPIO_WritePin(port, pin, GPIO_PIN_SET)
+#define LED_ON(port, pin)   VELIX_LED_ON((port), (pin))
+#define LED_OFF(port, pin)  VELIX_LED_OFF((port), (pin))
 
 // ────────────────────────────────────────────────
 //  颜色掩码（位定义）
@@ -36,13 +36,13 @@ typedef enum {
     LED_MODE_CUSTOM_BLINK,      // 自定义闪烁（最灵活）
 } LedMode_t;
 
-// GPIO 端口/引脚（从 CubeMX 生成的 main.h 引用）
-#define LED_R_PORT      LED_R_GPIO_Port
-#define LED_R_PIN       LED_R_Pin
-#define LED_G_PORT      LED_G_GPIO_Port
-#define LED_G_PIN       LED_G_Pin
-#define LED_B_PORT      LED_B_GPIO_Port
-#define LED_B_PIN       LED_B_Pin
+// GPIO 端口/引脚
+#define LED_R_PORT      VELIX_LED_R_GPIO_Port
+#define LED_R_PIN       VELIX_LED_R_Pin
+#define LED_G_PORT      VELIX_LED_G_GPIO_Port
+#define LED_G_PIN       VELIX_LED_G_Pin
+#define LED_B_PORT      VELIX_LED_B_GPIO_Port
+#define LED_B_PIN       VELIX_LED_B_Pin
 
 // ────────────────────────────────────────────────
 //  API 函数声明

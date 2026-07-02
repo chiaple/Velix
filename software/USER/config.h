@@ -6,6 +6,90 @@
 #define SPIN_MASTER_V2_CONFIG_H
 
 #include "arm_math.h"
+#include "main.h"
+#include "adc.h"
+#include "spi.h"
+#include "tim.h"
+#include "usart.h"
+
+//=============================Board mapping==============================
+// Keep CubeMX-generated names here. USER modules should prefer VELIX_* names
+// so board migration only needs this section adjusted.
+#define VELIX_RS485_DE_GPIO_Port        SP3485_GPIO_Port
+#define VELIX_RS485_DE_Pin              SP3485_Pin
+
+#define VELIX_KEY1_GPIO_Port            key1_GPIO_Port
+#define VELIX_KEY1_Pin                  key1_Pin
+#define VELIX_KEY2_GPIO_Port            key2_GPIO_Port
+#define VELIX_KEY2_Pin                  key2_Pin
+
+#define VELIX_LED_R_GPIO_Port           LED_R_GPIO_Port
+#define VELIX_LED_R_Pin                 LED_R_Pin
+#define VELIX_LED_G_GPIO_Port           LED_G_GPIO_Port
+#define VELIX_LED_G_Pin                 LED_G_Pin
+#define VELIX_LED_B_GPIO_Port           LED_B_GPIO_Port
+#define VELIX_LED_B_Pin                 LED_B_Pin
+
+#define VELIX_ENCODER_SPI               hspi1
+#define VELIX_ENCODER_CS_GPIO_Port      Encoder_CS_GPIO_Port
+#define VELIX_ENCODER_CS_Pin            Encoder_CS_Pin
+
+#define VELIX_PWM_TIM                   htim1
+#define VELIX_PWM_U_CHANNEL             TIM_CHANNEL_1
+#define VELIX_PWM_V_CHANNEL             TIM_CHANNEL_2
+#define VELIX_PWM_W_CHANNEL             TIM_CHANNEL_3
+#define VELIX_PWM_ADC_TRIG_CHANNEL      TIM_CHANNEL_4
+#define VELIX_TASK_TIM                  htim2
+#define VELIX_ADC_HANDLE                hadc1
+#define VELIX_ADC_INSTANCE              ADC1
+#define VELIX_ADC_IU_RANK               LL_ADC_INJ_RANK_1
+#define VELIX_ADC_IV_RANK               LL_ADC_INJ_RANK_2
+#define VELIX_ADC_IW_RANK               LL_ADC_INJ_RANK_3
+
+#define VELIX_COMM_UART_PORT            3
+#define VELIX_COMM_UART_HANDLE          huart3
+
+#define VELIX_RS485_RX_MODE() \
+    HAL_GPIO_WritePin(VELIX_RS485_DE_GPIO_Port, VELIX_RS485_DE_Pin, GPIO_PIN_RESET)
+
+#define VELIX_RS485_TX_MODE() \
+    HAL_GPIO_WritePin(VELIX_RS485_DE_GPIO_Port, VELIX_RS485_DE_Pin, GPIO_PIN_SET)
+
+#define VELIX_ENCODER_CS_LOW() \
+    HAL_GPIO_WritePin(VELIX_ENCODER_CS_GPIO_Port, VELIX_ENCODER_CS_Pin, GPIO_PIN_RESET)
+
+#define VELIX_ENCODER_CS_HIGH() \
+    HAL_GPIO_WritePin(VELIX_ENCODER_CS_GPIO_Port, VELIX_ENCODER_CS_Pin, GPIO_PIN_SET)
+
+#define VELIX_LED_ON(port, pin) \
+    HAL_GPIO_WritePin((port), (pin), GPIO_PIN_RESET)
+
+#define VELIX_LED_OFF(port, pin) \
+    HAL_GPIO_WritePin((port), (pin), GPIO_PIN_SET)
+
+#define VELIX_PWM_SET_U(compare) \
+    __HAL_TIM_SET_COMPARE(&VELIX_PWM_TIM, VELIX_PWM_U_CHANNEL, (compare))
+
+#define VELIX_PWM_SET_V(compare) \
+    __HAL_TIM_SET_COMPARE(&VELIX_PWM_TIM, VELIX_PWM_V_CHANNEL, (compare))
+
+#define VELIX_PWM_SET_W(compare) \
+    __HAL_TIM_SET_COMPARE(&VELIX_PWM_TIM, VELIX_PWM_W_CHANNEL, (compare))
+
+#define VELIX_PWM_SET_ADC_TRIGGER(compare) \
+    __HAL_TIM_SET_COMPARE(&VELIX_PWM_TIM, VELIX_PWM_ADC_TRIG_CHANNEL, (compare))
+
+#define VELIX_ADC_START_REG_CONVERSION() \
+    LL_ADC_REG_StartConversion(VELIX_ADC_INSTANCE)
+
+#define VELIX_ADC_REG_EOC() \
+    LL_ADC_IsActiveFlag_EOC(VELIX_ADC_INSTANCE)
+
+#define VELIX_ADC_READ_REG12() \
+    LL_ADC_REG_ReadConversionData12(VELIX_ADC_INSTANCE)
+
+#define VELIX_ADC_READ_INJ12(rank) \
+    LL_ADC_INJ_ReadConversionData12(VELIX_ADC_INSTANCE, (rank))
 
 #define   Udc                               20.0f               //母线电压
 #define _1_SQRT3 		                    0.57735027f         // 1/√3
@@ -138,7 +222,7 @@
 #define PID_HFI_ID_I_MAX_DEFAULT            2.0f        // HFI d轴电流环积分上限
 
 //=============================串口==============================
-#define COMM_UART_PORT 3
+#define COMM_UART_PORT VELIX_COMM_UART_PORT
 #define RX_BUF_SIZE 512
 // VOFA JustFloat: 每个通道 4 字节 float，帧尾固定 4 字节
 #define VOFA_MAX_CH_COUNT 16
