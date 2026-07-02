@@ -50,6 +50,13 @@
 #define VELIX_COMM_UART_PORT            3
 #define VELIX_COMM_UART_HANDLE          huart3
 
+typedef HAL_StatusTypeDef Velix_Status;
+typedef UART_HandleTypeDef Velix_UartHandle;
+
+#define VELIX_OK                        HAL_OK
+#define VELIX_ERROR                     HAL_ERROR
+#define VELIX_BUSY                      HAL_BUSY
+
 #define VELIX_RS485_RX_MODE() \
     HAL_GPIO_WritePin(VELIX_RS485_DE_GPIO_Port, VELIX_RS485_DE_Pin, GPIO_PIN_RESET)
 
@@ -94,6 +101,55 @@
 
 #define VELIX_ADC_READ_INJ12(rank) \
     LL_ADC_INJ_ReadConversionData12(VELIX_ADC_INSTANCE, (rank))
+
+static inline Velix_UartHandle *Velix_UartCommHandle(void)
+{
+    return &VELIX_COMM_UART_HANDLE;
+}
+
+static inline uint8_t Velix_UartIsIdle(Velix_UartHandle *huart)
+{
+    return (__HAL_UART_GET_FLAG(huart, UART_FLAG_IDLE) != RESET);
+}
+
+static inline void Velix_UartClearIdle(Velix_UartHandle *huart)
+{
+    __HAL_UART_CLEAR_IDLEFLAG(huart);
+}
+
+static inline uint32_t Velix_UartDmaRemaining(Velix_UartHandle *huart)
+{
+    return __HAL_DMA_GET_COUNTER(huart->hdmarx);
+}
+
+static inline Velix_Status Velix_UartStartDmaRx(Velix_UartHandle *huart,
+                                                uint8_t *buffer,
+                                                uint16_t bytes)
+{
+    return HAL_UART_Receive_DMA(huart, buffer, bytes);
+}
+
+static inline void Velix_UartEnableIdleIrq(Velix_UartHandle *huart)
+{
+    __HAL_UART_ENABLE_IT(huart, UART_IT_IDLE);
+}
+
+static inline void Velix_UartEnable(Velix_UartHandle *huart)
+{
+    __HAL_UART_ENABLE(huart);
+}
+
+static inline uint8_t Velix_UartIsReady(Velix_UartHandle *huart)
+{
+    return (huart->gState == HAL_UART_STATE_READY);
+}
+
+static inline Velix_Status Velix_UartStartDmaTx(Velix_UartHandle *huart,
+                                                const uint8_t *data,
+                                                uint16_t bytes)
+{
+    return HAL_UART_Transmit_DMA(huart, (uint8_t *)data, bytes);
+}
 
 #define   Udc                               20.0f               //母线电压
 #define _1_SQRT3 		                    0.57735027f         // 1/√3

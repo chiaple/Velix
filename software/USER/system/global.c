@@ -40,7 +40,7 @@ void System_Init(void){
     Key_Init(&key_2, VELIX_KEY2_GPIO_Port, VELIX_KEY2_Pin);
 
     // 通信串口 DMA 接收指令
-    if (UART_DMA_Receive_Init(Serial_GetCommUart(), serial_dma_rx_buf, RX_BUF_SIZE) != HAL_OK) {
+    if (UART_DMA_Receive_Init(Serial_GetCommUart(), serial_dma_rx_buf, RX_BUF_SIZE) != VELIX_OK) {
         Error_Handler();
     }
     VOFA_Init();

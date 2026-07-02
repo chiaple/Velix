@@ -20,40 +20,40 @@ volatile uint32_t rx_read_pos  = 0;   // 应用已处理到的位置（tail）
 __attribute__((aligned(4)))
 static uint8_t vofa_tx_buf[VOFA_FRAME_BYTES(VOFA_MAX_CH_COUNT)];
 
-UART_HandleTypeDef *Serial_GetCommUart(void)
+Velix_UartHandle *Serial_GetCommUart(void)
 {
-    return &VELIX_COMM_UART_HANDLE;
+    return Velix_UartCommHandle();
 }
 
-void Serial_HandleIdleIRQ(UART_HandleTypeDef *huart)
+void Serial_HandleIdleIRQ(Velix_UartHandle *huart)
 {
     if ((huart == NULL) || (huart != Serial_GetCommUart()))
     {
         return;
     }
 
-    if (__HAL_UART_GET_FLAG(huart, UART_FLAG_IDLE) != RESET)
+    if (Velix_UartIsIdle(huart))
     {
-        __HAL_UART_CLEAR_IDLEFLAG(huart);
-        rx_write_pos = RX_BUF_SIZE - __HAL_DMA_GET_COUNTER(huart->hdmarx);
+        Velix_UartClearIdle(huart);
+        rx_write_pos = RX_BUF_SIZE - Velix_UartDmaRemaining(huart);
     }
 }
 
-HAL_StatusTypeDef UART_DMA_Receive_Init(UART_HandleTypeDef *huart, uint8_t *buffer, uint16_t bytes)
+Velix_Status UART_DMA_Receive_Init(Velix_UartHandle *huart, uint8_t *buffer, uint16_t bytes)
 {
     if (huart == NULL || buffer == NULL || bytes == 0U)
     {
-        return HAL_ERROR;
+        return VELIX_ERROR;
     }
 
-    if (HAL_UART_Receive_DMA(huart, buffer, bytes) != HAL_OK)
+    if (Velix_UartStartDmaRx(huart, buffer, bytes) != VELIX_OK)
     {
-        return HAL_ERROR;
+        return VELIX_ERROR;
     }
 
-    __HAL_UART_ENABLE_IT(huart, UART_IT_IDLE);
-    __HAL_UART_ENABLE(huart);
-    return HAL_OK;
+    Velix_UartEnableIdleIrq(huart);
+    Velix_UartEnable(huart);
+    return VELIX_OK;
 }
 // 指令解析函数（主循环或 FOC 任务里反复调用）
 void Serial_ParseCommand(void)
@@ -126,42 +126,32 @@ void VOFA_Init(void)
 
     // 可选：清零数据区，防止启动时发垃圾值
     memset(vofa_tx_buf, 0, sizeof(vofa_tx_buf) - 4U);
-
-    // 启用 DMA TC 中断（通道根据 CubeMX 配置改，这里假设 Channel 2）
-    /* 注意：在 HAL 库中，你【不需要】手动调用 LL_DMA_EnableIT_TC。
-       当你之后调用 HAL_UART_Transmit_DMA(&huartx, ...) 时，
-       HAL 会自动开启 DMA 的 TC 中断。
-
-       如果你非要手动开启（通常不建议，除非你在做非标准的底层开发）：
-       __HAL_DMA_ENABLE_IT(&hdma_usart3_tx, DMA_IT_TC);
-    */
-    //LL_DMA_EnableIT_TC(DMA1, LL_DMA_CHANNEL_2);
 }
 
 // =============================================
 //===================DMA发送
-HAL_StatusTypeDef UART_DMA_Send(UART_HandleTypeDef *huart, const uint8_t *data, uint16_t bytes)
+Velix_Status UART_DMA_Send(Velix_UartHandle *huart, const uint8_t *data, uint16_t bytes)
 {
     if (huart == NULL || data == NULL || bytes == 0U)
     {
-        return HAL_ERROR;
+        return VELIX_ERROR;
     }
 
     // 空闲时启动新的 DMA 发送，避免打断上次发送。
-    if (huart->gState != HAL_UART_STATE_READY)
+    if (!Velix_UartIsReady(huart))
     {
-        return HAL_BUSY;
+        return VELIX_BUSY;
     }
 
-    return HAL_UART_Transmit_DMA(huart, (uint8_t *)data, bytes);//此函数会自动开启 DMA 的 TC 中断，不用LL的LL_DMA_EnableIT_TC
+    return Velix_UartStartDmaTx(huart, data, bytes);
 }
 
 // ================vofa发送=============================
-HAL_StatusTypeDef VOFA_SendFloats(const float *data, uint16_t count)
+Velix_Status VOFA_SendFloats(const float *data, uint16_t count)
 {
     if (data == NULL || count == 0U || count > VOFA_MAX_CH_COUNT)
     {
-        return HAL_ERROR;
+        return VELIX_ERROR;
     }
 
     for (uint16_t i = 0; i < count; i++)
