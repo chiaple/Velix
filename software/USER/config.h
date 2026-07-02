@@ -97,7 +97,7 @@
 
 #define   Udc                               20.0f               //母线电压
 #define _1_SQRT3 		                    0.57735027f         // 1/√3
-#define TIM1_ARR                            4249
+#define VELIX_PWM_PERIOD_TICKS              4249
 
 #define TS                                  0.00005f //20kHz FOC执行间隔
 

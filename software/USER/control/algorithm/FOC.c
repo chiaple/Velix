@@ -182,7 +182,11 @@ SVPWM CalculateSVPWM(FOC_STRUCT *foc, const float32_t Uq, const float32_t Ud, co
             Tcmp3 = Ta;
             break;
     }
-    const SVPWM outputs = (SVPWM){Tcmp1 * TIM1_ARR, Tcmp2 * TIM1_ARR, Tcmp3 * TIM1_ARR};
+    const SVPWM outputs = (SVPWM){
+        Tcmp1 * VELIX_PWM_PERIOD_TICKS,
+        Tcmp2 * VELIX_PWM_PERIOD_TICKS,
+        Tcmp3 * VELIX_PWM_PERIOD_TICKS
+    };
     return outputs;
 }
 
