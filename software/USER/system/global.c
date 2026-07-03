@@ -32,7 +32,7 @@ char ad[20];
   */
 void System_Init(void){
 
-    HAL_Delay(200);
+    Velix_DelayMs(200);
 
     VELIX_RS485_RX_MODE(); // 高电平发送，低电平接收
     /**按键初始化*/
@@ -41,7 +41,7 @@ void System_Init(void){
 
     // 通信串口 DMA 接收指令
     if (UART_DMA_Receive_Init(Serial_GetCommUart(), serial_dma_rx_buf, RX_BUF_SIZE) != VELIX_OK) {
-        Error_Handler();
+        Velix_ErrorHandler();
     }
     VOFA_Init();
 
@@ -121,10 +121,10 @@ void System_Init(void){
     CalibrateCurrentOffset(&Mt.sample);
 
     //次要任务
-    HAL_TIM_Base_Start_IT(&VELIX_TASK_TIM);
+    Velix_TaskTimerStartInterrupt();
 
-    // 开启注入转换和中断，由 HAL callback 驱动 FOC 快环
-    HAL_ADCEx_InjectedStart_IT(&VELIX_ADC_HANDLE);
+    // 开启注入转换和中断，由平台回调驱动 FOC 快环
+    Velix_AdcInjectedStartInterrupt();
     VELIX_PWM_SET_ADC_TRIGGER(4000); // ADC 注入组通道中断触发开关
     //LED初始化
     LED_Init();
@@ -173,18 +173,18 @@ void FOC_Loop(MotorSystem *p){
 
 }
 
-void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
+void VELIX_ADC_INJECTED_CALLBACK(Velix_AdcHandle *adc)
 {
-    if (hadc->Instance == VELIX_ADC_INSTANCE)
+    if (Velix_IsCurrentAdc(adc))
     {
         FOC_Loop(&Mt);
     }
 }
 
-// 当 定时器中断回调
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+// 定时器周期回调
+void VELIX_TIMER_PERIOD_CALLBACK(Velix_TimerHandle *timer)
 {
-    if (htim->Instance == VELIX_TASK_TIM.Instance)
+    if (Velix_IsTaskTimer(timer))
     {
         sys_tick_ms++;
         task_counter++;

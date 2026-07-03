@@ -20,7 +20,7 @@ typedef enum {
 }KeyEvent;
 
 typedef struct {
-    GPIO_TypeDef* GPIOx;
+    Velix_GpioPort* GPIOx;
     uint16_t GPIO_Pin;
 
     bool last_state;
@@ -34,7 +34,7 @@ typedef struct {
 
 extern Key key_1,key_2;;
 
-void Key_Init(Key* key,GPIO_TypeDef* GPIOx,uint16_t GPIO_Pin);
+void Key_Init(Key* key, Velix_GpioPort* GPIOx, uint16_t GPIO_Pin);
 void Key_Scan(Key* key);
 KeyEvent key_GetEvent(Key* key);
 void Key_Handler(Key* key,void(*single_cb)(void),void(*double_cb)(void),void(*long_cb)(void));

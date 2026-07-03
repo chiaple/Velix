@@ -25,34 +25,34 @@ Velix_UartHandle *Serial_GetCommUart(void)
     return Velix_UartCommHandle();
 }
 
-void Serial_HandleIdleIRQ(Velix_UartHandle *huart)
+void Serial_HandleIdleIRQ(Velix_UartHandle *uart)
 {
-    if ((huart == NULL) || (huart != Serial_GetCommUart()))
+    if ((uart == NULL) || (uart != Serial_GetCommUart()))
     {
         return;
     }
 
-    if (Velix_UartIsIdle(huart))
+    if (Velix_UartIsIdle(uart))
     {
-        Velix_UartClearIdle(huart);
-        rx_write_pos = RX_BUF_SIZE - Velix_UartDmaRemaining(huart);
+        Velix_UartClearIdle(uart);
+        rx_write_pos = RX_BUF_SIZE - Velix_UartDmaRemaining(uart);
     }
 }
 
-Velix_Status UART_DMA_Receive_Init(Velix_UartHandle *huart, uint8_t *buffer, uint16_t bytes)
+Velix_Status UART_DMA_Receive_Init(Velix_UartHandle *uart, uint8_t *buffer, uint16_t bytes)
 {
-    if (huart == NULL || buffer == NULL || bytes == 0U)
+    if (uart == NULL || buffer == NULL || bytes == 0U)
     {
         return VELIX_ERROR;
     }
 
-    if (Velix_UartStartDmaRx(huart, buffer, bytes) != VELIX_OK)
+    if (Velix_UartStartDmaRx(uart, buffer, bytes) != VELIX_OK)
     {
         return VELIX_ERROR;
     }
 
-    Velix_UartEnableIdleIrq(huart);
-    Velix_UartEnable(huart);
+    Velix_UartEnableIdleIrq(uart);
+    Velix_UartEnable(uart);
     return VELIX_OK;
 }
 // 指令解析函数（主循环或 FOC 任务里反复调用）
@@ -106,9 +106,6 @@ void Serial_ParseCommand(void)
         // 推进读指针（环形）
         rx_read_pos = (rx_read_pos + cmd_len) % RX_BUF_SIZE;
     }
-
-    // 可选：翻转 LED 表示有新指令被处理（放在 while 外面或里面都行）
-    // LL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 }
 
 
@@ -130,20 +127,20 @@ void VOFA_Init(void)
 
 // =============================================
 //===================DMA发送
-Velix_Status UART_DMA_Send(Velix_UartHandle *huart, const uint8_t *data, uint16_t bytes)
+Velix_Status UART_DMA_Send(Velix_UartHandle *uart, const uint8_t *data, uint16_t bytes)
 {
-    if (huart == NULL || data == NULL || bytes == 0U)
+    if (uart == NULL || data == NULL || bytes == 0U)
     {
         return VELIX_ERROR;
     }
 
     // 空闲时启动新的 DMA 发送，避免打断上次发送。
-    if (!Velix_UartIsReady(huart))
+    if (!Velix_UartIsReady(uart))
     {
         return VELIX_BUSY;
     }
 
-    return Velix_UartStartDmaTx(huart, data, bytes);
+    return Velix_UartStartDmaTx(uart, data, bytes);
 }
 
 // ================vofa发送=============================

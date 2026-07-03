@@ -13,10 +13,8 @@ uint16_t MT6701_ReadRaw(void) {
     // 1. 片选拉低
     VELIX_ENCODER_CS_LOW();
 
-    // 2. 调用 HAL 全双工传输函数
-    // 参数：句柄，发送缓冲区指针，接收缓冲区指针，数据长度(按DataSize计)，超时时间(ms)
-    // 注意：HAL 内部会自动处理 TXE 和 BSY 标志位，不需要手动 while 判断
-    if (HAL_SPI_TransmitReceive(&VELIX_ENCODER_SPI, (uint8_t *)&dummy, (uint8_t *)&raw, 1, 10) != HAL_OK) {
+    // 2. 读取编码器原始数据
+    if (Velix_EncoderTransfer16(dummy, &raw, 10) != VELIX_OK) {
         // 可以在这里做错误处理
     }
 

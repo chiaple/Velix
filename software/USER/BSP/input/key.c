@@ -7,7 +7,7 @@
 Key key_1,key_2;
 
 //按键初始化
-void Key_Init(Key* key,GPIO_TypeDef* GPIOx,uint16_t GPIO_Pin){
+void Key_Init(Key* key, Velix_GpioPort* GPIOx, uint16_t GPIO_Pin){
      key->GPIOx = GPIOx;
      key->GPIO_Pin = GPIO_Pin;
      key->last_state = VELIX_GPIO_IS_SET(GPIOx, GPIO_Pin);

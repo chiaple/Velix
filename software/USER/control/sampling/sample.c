@@ -28,7 +28,7 @@ void CalibrateCurrentOffset(SAMPLE_STRUCT *sample) {
     sample->IwOffset = VELIX_ADC_READ_REG12();
 
     //sprintf(vel,"%d,%d,%d\n",Mt.sample.IuOffset ,Mt.sample.IvOffset ,Mt.sample.IwOffset );
-    HAL_Delay(100);
+    Velix_DelayMs(100);
 }
 
 /**

@@ -7,10 +7,10 @@
 
 #include "config.h"
 
-Velix_Status UART_DMA_Send(Velix_UartHandle *huart, const uint8_t *data, uint16_t bytes);
-Velix_Status UART_DMA_Receive_Init(Velix_UartHandle *huart, uint8_t *buffer, uint16_t bytes);
+Velix_Status UART_DMA_Send(Velix_UartHandle *uart, const uint8_t *data, uint16_t bytes);
+Velix_Status UART_DMA_Receive_Init(Velix_UartHandle *uart, uint8_t *buffer, uint16_t bytes);
 Velix_UartHandle *Serial_GetCommUart(void);
-void Serial_HandleIdleIRQ(Velix_UartHandle *huart);
+void Serial_HandleIdleIRQ(Velix_UartHandle *uart);
 void Serial_ParseCommand(void);
 Velix_Status VOFA_SendFloats(const float *data, uint16_t count);
 void VOFA_SendChannels(float ch1, float ch2, float ch3, float ch4);
