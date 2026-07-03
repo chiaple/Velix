@@ -108,95 +108,57 @@ typedef TIM_HandleTypeDef Velix_TimerHandle;
 #define VELIX_ADC_READ_INJ12(rank) \
     LL_ADC_INJ_ReadConversionData12(VELIX_ADC_INSTANCE, (rank))
 
-static inline void Velix_DelayMs(uint32_t ms)
-{
-    HAL_Delay(ms);
-}
+#define Velix_DelayMs(ms) \
+    HAL_Delay((ms))
 
-static inline void Velix_ErrorHandler(void)
-{
-    Error_Handler();
-}
+#define Velix_ErrorHandler() \
+    Error_Handler()
 
-static inline void Velix_TaskTimerStartInterrupt(void)
-{
-    HAL_TIM_Base_Start_IT(&VELIX_TASK_TIM);
-}
+#define Velix_TaskTimerStartInterrupt() \
+    HAL_TIM_Base_Start_IT(&VELIX_TASK_TIM)
 
-static inline uint8_t Velix_IsTaskTimer(Velix_TimerHandle *timer)
-{
-    return (timer->Instance == VELIX_TASK_TIM.Instance);
-}
+#define Velix_IsTaskTimer(timer) \
+    ((timer)->Instance == VELIX_TASK_TIM.Instance)
 
-static inline void Velix_AdcInjectedStartInterrupt(void)
-{
-    HAL_ADCEx_InjectedStart_IT(&VELIX_ADC_HANDLE);
-}
+#define Velix_AdcInjectedStartInterrupt() \
+    HAL_ADCEx_InjectedStart_IT(&VELIX_ADC_HANDLE)
 
-static inline uint8_t Velix_IsCurrentAdc(Velix_AdcHandle *adc)
-{
-    return (adc->Instance == VELIX_ADC_INSTANCE);
-}
+#define Velix_IsCurrentAdc(adc) \
+    ((adc)->Instance == VELIX_ADC_INSTANCE)
 
-static inline Velix_Status Velix_EncoderTransfer16(uint16_t tx_data,
-                                                   uint16_t *rx_data,
-                                                   uint32_t timeout_ms)
-{
-    return HAL_SPI_TransmitReceive(&VELIX_ENCODER_SPI,
-                                   (uint8_t *)&tx_data,
-                                   (uint8_t *)rx_data,
-                                   1,
-                                   timeout_ms);
-}
+#define Velix_EncoderTransfer16(tx_data, rx_data, timeout_ms) \
+    HAL_SPI_TransmitReceive(&VELIX_ENCODER_SPI, \
+                            (uint8_t *)&(tx_data), \
+                            (uint8_t *)(rx_data), \
+                            1, \
+                            (timeout_ms))
 
-static inline Velix_UartHandle *Velix_UartCommHandle(void)
-{
-    return &VELIX_COMM_UART_HANDLE;
-}
+#define Velix_UartCommHandle() \
+    (&VELIX_COMM_UART_HANDLE)
 
-static inline uint8_t Velix_UartIsIdle(Velix_UartHandle *uart)
-{
-    return (__HAL_UART_GET_FLAG(uart, UART_FLAG_IDLE) != RESET);
-}
+#define Velix_UartIsIdle(uart) \
+    (__HAL_UART_GET_FLAG((uart), UART_FLAG_IDLE) != RESET)
 
-static inline void Velix_UartClearIdle(Velix_UartHandle *uart)
-{
-    __HAL_UART_CLEAR_IDLEFLAG(uart);
-}
+#define Velix_UartClearIdle(uart) \
+    __HAL_UART_CLEAR_IDLEFLAG((uart))
 
-static inline uint32_t Velix_UartDmaRemaining(Velix_UartHandle *uart)
-{
-    return __HAL_DMA_GET_COUNTER(uart->hdmarx);
-}
+#define Velix_UartDmaRemaining(uart) \
+    __HAL_DMA_GET_COUNTER((uart)->hdmarx)
 
-static inline Velix_Status Velix_UartStartDmaRx(Velix_UartHandle *uart,
-                                                uint8_t *buffer,
-                                                uint16_t bytes)
-{
-    return HAL_UART_Receive_DMA(uart, buffer, bytes);
-}
+#define Velix_UartStartDmaRx(uart, buffer, bytes) \
+    HAL_UART_Receive_DMA((uart), (buffer), (bytes))
 
-static inline void Velix_UartEnableIdleIrq(Velix_UartHandle *uart)
-{
-    __HAL_UART_ENABLE_IT(uart, UART_IT_IDLE);
-}
+#define Velix_UartEnableIdleIrq(uart) \
+    __HAL_UART_ENABLE_IT((uart), UART_IT_IDLE)
 
-static inline void Velix_UartEnable(Velix_UartHandle *uart)
-{
-    __HAL_UART_ENABLE(uart);
-}
+#define Velix_UartEnable(uart) \
+    __HAL_UART_ENABLE((uart))
 
-static inline uint8_t Velix_UartIsReady(Velix_UartHandle *uart)
-{
-    return (uart->gState == HAL_UART_STATE_READY);
-}
+#define Velix_UartIsReady(uart) \
+    ((uart)->gState == HAL_UART_STATE_READY)
 
-static inline Velix_Status Velix_UartStartDmaTx(Velix_UartHandle *uart,
-                                                const uint8_t *data,
-                                                uint16_t bytes)
-{
-    return HAL_UART_Transmit_DMA(uart, (uint8_t *)data, bytes);
-}
+#define Velix_UartStartDmaTx(uart, data, bytes) \
+    HAL_UART_Transmit_DMA((uart), (uint8_t *)(data), (bytes))
 
 #define   Udc                               20.0f               //母线电压
 #define _1_SQRT3 		                    0.57735027f         // 1/√3
