@@ -45,48 +45,48 @@ target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
 # Add sources to executable
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user sources here
-    USER/BSP/Display/ST7789/st7789.c
-    USER/BSP/ENCODER/MT6701/MT6701.c
-    USER/BSP/input/key.c
-    USER/control/algorithm/FOC.c
-    USER/control/algorithm/PID.c
-    USER/control/command/command.c
-    USER/control/estimation/encoder.c
-    USER/control/estimation/observer.c
-    USER/control/estimation/velocity.c
-    USER/control/mode/identify.c
-    USER/control/mode/motor_stop.c
-    USER/control/mode/sensorless.c
-    USER/control/mode/sensoruse.c
-    USER/control/sampling/sample.c
-    USER/model/motor.c
-    USER/service/audio/motor_tone.c
-    USER/service/audio/tone_presets.c
-    USER/service/comm/serial.c
-    USER/service/comm/serial_commands.c
-    USER/service/comm/vofa_profile.c
-    USER/service/indicator/key_actions.c
-    USER/service/indicator/led_task.c
-    USER/system/global.c
+    Velix/BSP/Display/ST7789/st7789.c
+    Velix/BSP/ENCODER/MT6701/MT6701.c
+    Velix/BSP/input/key.c
+    Velix/control/algorithm/FOC.c
+    Velix/control/algorithm/PID.c
+    Velix/control/command/command.c
+    Velix/control/estimation/encoder.c
+    Velix/control/estimation/observer.c
+    Velix/control/estimation/velocity.c
+    Velix/control/mode/identify.c
+    Velix/control/mode/motor_stop.c
+    Velix/control/mode/sensorless.c
+    Velix/control/mode/sensoruse.c
+    Velix/control/sampling/sample.c
+    Velix/model/motor.c
+    Velix/service/audio/motor_tone.c
+    Velix/service/audio/tone_presets.c
+    Velix/service/comm/serial.c
+    Velix/service/comm/serial_commands.c
+    Velix/service/comm/vofa_profile.c
+    Velix/service/indicator/key_actions.c
+    Velix/service/indicator/led_task.c
+    Velix/system/global.c
 )
 
 # Add include paths
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined include paths
-    USER
-    USER/BSP/Display/ST7789
-    USER/BSP/ENCODER/MT6701
-    USER/BSP/input
-    USER/control/algorithm
-    USER/control/command
-    USER/control/estimation
-    USER/control/mode
-    USER/control/sampling
-    USER/model
-    USER/service/audio
-    USER/service/comm
-    USER/service/indicator
-    USER/system
+    Velix
+    Velix/BSP/Display/ST7789
+    Velix/BSP/ENCODER/MT6701
+    Velix/BSP/input
+    Velix/control/algorithm
+    Velix/control/command
+    Velix/control/estimation
+    Velix/control/mode
+    Velix/control/sampling
+    Velix/model
+    Velix/service/audio
+    Velix/service/comm
+    Velix/service/indicator
+    Velix/system
 )
 
 # Add project symbols (macros)
