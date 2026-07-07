@@ -40,10 +40,10 @@ void System_Init(void){
     Key_Init(&key_2, VELIX_KEY2_GPIO_Port, VELIX_KEY2_Pin);
 
     // 通信串口 DMA 接收指令
-    if (UART_DMA_Receive_Init(Serial_GetCommUart(), serial_dma_rx_buf, RX_BUF_SIZE) != VELIX_OK) {
-        Velix_ErrorHandler();
-    }
-    VOFA_Init();
+    //if (UART_DMA_Receive_Init(Serial_GetCommUart(), serial_dma_rx_buf, RX_BUF_SIZE) != VELIX_OK) {
+        //Velix_ErrorHandler();
+    //}
+    //VOFA_Init();
 
     MotorCommand_Init(&Mt.cmd);//上电状态
 
@@ -118,7 +118,7 @@ void System_Init(void){
              PID_HFI_ID_I_MIN_DEFAULT, PID_HFI_ID_I_MAX_DEFAULT);
 
     //电流校准
-    CalibrateCurrentOffset(&Mt.sample);
+    //CalibrateCurrentOffset(&Mt.sample);
 
     //次要任务
     Velix_TaskTimerStartInterrupt();

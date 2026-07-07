@@ -43,9 +43,9 @@
 #define VELIX_TASK_TIM                  htim2
 #define VELIX_ADC_HANDLE                hadc1
 #define VELIX_ADC_INSTANCE              ADC1
-#define VELIX_ADC_IU_RANK               LL_ADC_INJ_RANK_1
-#define VELIX_ADC_IV_RANK               LL_ADC_INJ_RANK_2
-#define VELIX_ADC_IW_RANK               LL_ADC_INJ_RANK_3
+#define VELIX_ADC_IU_RANK               ADC_INJECTED_RANK_1
+#define VELIX_ADC_IV_RANK               ADC_INJECTED_RANK_2
+#define VELIX_ADC_IW_RANK               ADC_INJECTED_RANK_3
 
 #define VELIX_COMM_UART_PORT            3
 #define VELIX_COMM_UART_HANDLE          huart3
@@ -97,16 +97,16 @@ typedef TIM_HandleTypeDef Velix_TimerHandle;
     __HAL_TIM_SET_COMPARE(&VELIX_PWM_TIM, VELIX_PWM_ADC_TRIG_CHANNEL, (compare))
 
 #define VELIX_ADC_START_REG_CONVERSION() \
-    LL_ADC_REG_StartConversion(VELIX_ADC_INSTANCE)
+    HAL_ADC_Start(&VELIX_ADC_HANDLE)
 
 #define VELIX_ADC_REG_EOC() \
-    LL_ADC_IsActiveFlag_EOC(VELIX_ADC_INSTANCE)
+    (HAL_ADC_PollForConversion(&VELIX_ADC_HANDLE, 10) == HAL_OK)
 
 #define VELIX_ADC_READ_REG12() \
-    LL_ADC_REG_ReadConversionData12(VELIX_ADC_INSTANCE)
+    HAL_ADC_GetValue(&VELIX_ADC_HANDLE)
 
 #define VELIX_ADC_READ_INJ12(rank) \
-    LL_ADC_INJ_ReadConversionData12(VELIX_ADC_INSTANCE, (rank))
+    HAL_ADCEx_InjectedGetValue(&VELIX_ADC_HANDLE, (rank))
 
 #define Velix_DelayMs(ms) \
     HAL_Delay((ms))

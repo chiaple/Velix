@@ -113,14 +113,15 @@ int main(void)
   __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 60000);
   ST7789_Init();
   //ST7789_Test();
-  ST7789_Test_1();
-  //System_Init();
+  //ST7789_Test_1();
+  System_Init();
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+    System_Loop();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
