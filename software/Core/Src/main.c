@@ -31,6 +31,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "global.h"
+#include "st7789.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -108,7 +109,12 @@ int main(void)
   MX_I2C3_Init();
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
-  System_Init();
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
+  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 60000);
+  ST7789_Init();
+  ST7789_Test();
+  //ST7789_Test_1();
+  //System_Init();
   /* USER CODE END 2 */
 
   /* Infinite loop */

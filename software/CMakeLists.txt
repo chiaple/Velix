@@ -45,6 +45,7 @@ target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
 # Add sources to executable
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user sources here
+    Velix/BSP/Display/ST7789/fonts.c
     Velix/BSP/Display/ST7789/st7789.c
     Velix/BSP/ENCODER/MT6701/MT6701.c
     Velix/BSP/input/key.c
