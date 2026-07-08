@@ -108,6 +108,15 @@ typedef TIM_HandleTypeDef Velix_TimerHandle;
 #define VELIX_ADC_READ_INJ12(rank) \
     HAL_ADCEx_InjectedGetValue(&VELIX_ADC_HANDLE, (rank))
 
+#define VELIX_ADC_START_INJ_CONVERSION() \
+    HAL_ADCEx_InjectedStart(&VELIX_ADC_HANDLE)
+
+#define VELIX_ADC_INJ_EOC(timeout_ms) \
+    (HAL_ADCEx_InjectedPollForConversion(&VELIX_ADC_HANDLE, (timeout_ms)) == HAL_OK)
+
+#define VELIX_ADC_STOP_INJ_CONVERSION() \
+    HAL_ADCEx_InjectedStop(&VELIX_ADC_HANDLE)
+
 #define Velix_DelayMs(ms) \
     HAL_Delay((ms))
 
@@ -167,9 +176,9 @@ typedef TIM_HandleTypeDef Velix_TimerHandle;
 #define TS                                  0.00005f //20kHz FOC执行间隔
 
 #define SAMPLING_RESITOR                    0.005f      //相电流采样电阻
-#define MAGNIFICATION                       20.0f       //分流放大器倍数
+#define MAGNIFICATION                       10.0f       //放大器倍数
 #define ADC_RESOLUTION                      4096.0f     //ADC分辨率
-#define ADC_VREF                            3.25f        //ADC基准电压
+#define ADC_VREF                            3.3f        //ADC基准电压
 
 #define ENCODER_MAX                         16384.0f    //外部磁编码器最大值
 

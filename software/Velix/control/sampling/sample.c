@@ -12,22 +12,49 @@
  *
  * */
 char vel[20];
-void CalibrateCurrentOffset(SAMPLE_STRUCT *sample) {
-    VELIX_ADC_START_REG_CONVERSION();
+void CalibrateCurrentOffset(SAMPLE_STRUCT *sample)
+{
+    if (sample == NULL) {
+        return;
+    }
 
-    // 等待 Rank1 完成
-    while (!VELIX_ADC_REG_EOC()) {}
-    sample->IuOffset = VELIX_ADC_READ_REG12();
+    enum {
+        CALIB_SAMPLES = 64,
+        CALIB_TIMEOUT_MS = 20
+    };
 
-    // 等待 Rank2 完成
-    while (!VELIX_ADC_REG_EOC()) {}
-    sample->IvOffset = VELIX_ADC_READ_REG12();
+    uint32_t iu_sum = 0;
+    uint32_t iv_sum = 0;
+    uint32_t iw_sum = 0;
+    uint32_t valid_samples = 0;
 
-    //等待 Rank3 完成
-    while (!VELIX_ADC_REG_EOC()) {}
-    sample->IwOffset = VELIX_ADC_READ_REG12();
+    VELIX_PWM_SET_ADC_TRIGGER(4000);
 
-    //sprintf(vel,"%d,%d,%d\n",Mt.sample.IuOffset ,Mt.sample.IvOffset ,Mt.sample.IwOffset );
+    if (VELIX_ADC_START_INJ_CONVERSION() != VELIX_OK) {
+        return;
+    }
+
+    for (uint32_t i = 0; i < CALIB_SAMPLES; i++) {
+        if (!VELIX_ADC_INJ_EOC(CALIB_TIMEOUT_MS)) {
+            break;
+        }
+
+        iu_sum += VELIX_ADC_READ_INJ12(VELIX_ADC_IU_RANK);
+        iv_sum += VELIX_ADC_READ_INJ12(VELIX_ADC_IV_RANK);
+        iw_sum += VELIX_ADC_READ_INJ12(VELIX_ADC_IW_RANK);
+        valid_samples++;
+    }
+
+    (void)VELIX_ADC_STOP_INJ_CONVERSION();
+
+    if (valid_samples == 0U) {
+        return;
+    }
+
+    sample->IuOffset = (uint16_t)(iu_sum / valid_samples);
+    sample->IvOffset = (uint16_t)(iv_sum / valid_samples);
+    sample->IwOffset = (uint16_t)(iw_sum / valid_samples);
+
     Velix_DelayMs(100);
 }
 
@@ -38,17 +65,17 @@ void CalibrateCurrentOffset(SAMPLE_STRUCT *sample) {
 void Calculate_Phase_Current(SAMPLE_STRUCT *sample, FOC_STRUCT *foc){
     sample->IuRaw = VELIX_ADC_READ_INJ12(VELIX_ADC_IU_RANK);
     sample->IvRaw = VELIX_ADC_READ_INJ12(VELIX_ADC_IV_RANK);
-    sample->IwRaw = VELIX_ADC_READ_INJ12(VELIX_ADC_IW_RANK);
+    sample->BusRaw = VELIX_ADC_READ_INJ12(VELIX_ADC_IW_RANK);
 
     //三相电压
     const float32_t u_1 = ADC_VREF * ((float32_t)(sample->IuRaw - sample->IuOffset) / ADC_RESOLUTION);
     const float32_t u_2 = ADC_VREF * ((float32_t)(sample->IvRaw - sample->IvOffset) / ADC_RESOLUTION);
-    const float32_t u_3 = ADC_VREF * ((float32_t)(sample->IwRaw - sample->IwOffset) / ADC_RESOLUTION);
+    sample->BusReal = ADC_VREF * ((float32_t)sample->BusRaw / ADC_RESOLUTION) * 22.27f;
     //三相电流
 //    p->IuReal = u_1 / (SAMPLING_RESITOR * MAGNIFICATION);
 //    p->IvReal = u_2 / (SAMPLING_RESITOR * MAGNIFICATION);
 //    p->IwReal = u_3 / (SAMPLING_RESITOR * MAGNIFICATION);
     foc->iu = u_1 / (SAMPLING_RESITOR * MAGNIFICATION);
     foc->iv = u_2 / (SAMPLING_RESITOR * MAGNIFICATION);
-    foc->iw = u_3 / (SAMPLING_RESITOR * MAGNIFICATION);
+    foc->iw = -(foc->iu + foc->iv);
 }

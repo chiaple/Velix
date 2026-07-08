@@ -12,7 +12,7 @@
 static uint8_t calib_started = 0U;
 static uint32_t calib_start_ms = 0U;
 
-static void Sensoruse_EncoderCalib(MotorSystem *p)
+ void Sensoruse_EncoderCalib(MotorSystem *p)
 {
     if (calib_started == 0U) {
         calib_started = 1U;

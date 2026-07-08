@@ -113,7 +113,31 @@ void MX_TIM1_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN TIM1_Init 2 */
+  // 1. 设置初始占空比 (CCR)
+  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
+  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 0);
+  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, 0);
+  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_4, 0);
 
+  // 2. 使能正向通道 (CH1, CH2, CH3, CH4)
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_4);
+
+  // 3. 使能互补通道 (CH1N, CH2N, CH3N)
+  // 注意：FOC 通常只需要前三路互补，第四路通常用于 ADC 触发，所以没有 N 通道
+  HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_1);
+  HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_2);
+  HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_3);
+
+  // 4. 使能主输出 (MOE) 并 开启计数器
+  // 在 HAL 库中，上面的 Start 函数会自动处理一部分，
+  // 但为了保险（对应 LL_TIM_EnableAllOutputs），可以显式调用：
+  __HAL_TIM_MOE_ENABLE(&htim1);
+
+  // 注意：HAL_TIM_PWM_Start 内部已经调用了开启计数器的指令，
+  // 所以通常不需要再额外写 LL_TIM_EnableCounter。
   /* USER CODE END TIM1_Init 2 */
   HAL_TIM_MspPostInit(&htim1);
 

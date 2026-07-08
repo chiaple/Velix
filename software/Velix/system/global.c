@@ -34,6 +34,8 @@ void System_Init(void){
 
     Velix_DelayMs(200);
 
+
+
     VELIX_RS485_RX_MODE(); // 高电平发送，低电平接收
     /**按键初始化*/
     Key_Init(&key_1, VELIX_KEY1_GPIO_Port, VELIX_KEY1_Pin);
@@ -77,6 +79,15 @@ void System_Init(void){
 
     motor_Init(&Mt.motor, MOTOR_NUMBER_DEFAULT, MOTOR_DIR_DEFAULT, MOTOR_POLE_PAIRS_DEFAULT);
 
+
+    // Mt.foc.Uq = 0.0f;
+    // Mt.foc.Ud = ENCODER_CALIB_UD_DEFAULT;
+    // setSVPWM(0, Mt.foc.Uq, Mt.foc.Ud, 0);
+    // Velix_DelayMs(1000);
+    // Mt.foc.Uq = 0.0f;
+    // Mt.foc.Ud = 0.0f;
+    // setSVPWM(0, Mt.foc.Uq, Mt.foc.Ud, 0);
+
     Mt.HfiSmoSwitch.HfiOnlySpeedLimit = Mt.motor.polePairs * 800.0f;
     Mt.HfiSmoSwitch.HfiDisableSpeedMargin = Mt.motor.polePairs * 900.0f;
     Mt.HfiSmoSwitch.TransitionHighSpeedLimit = Mt.motor.polePairs * 1000.0f;
@@ -118,7 +129,7 @@ void System_Init(void){
              PID_HFI_ID_I_MIN_DEFAULT, PID_HFI_ID_I_MAX_DEFAULT);
 
     //电流校准
-    //CalibrateCurrentOffset(&Mt.sample);
+    CalibrateCurrentOffset(&Mt.sample);
 
     //次要任务
     Velix_TaskTimerStartInterrupt();
@@ -129,7 +140,9 @@ void System_Init(void){
     //LED初始化
     LED_Init();
     // 电机发声初始化
-    MotorTone_Init();
+    //MotorTone_Init();
+
+
 }
 
 

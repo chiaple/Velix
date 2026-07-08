@@ -142,7 +142,20 @@ void MX_ADC1_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN ADC1_Init 2 */
+  //校准
+  // 1. ADC 校准 (对应 LL_ADC_StartCalibration 和等待)
+  if (HAL_ADCEx_Calibration_Start(&hadc1, ADC_SINGLE_ENDED) != HAL_OK)
+  {
+    /* 校准错误处理 */
+    Error_Handler();
+  }
 
+  // 2. 使能并启动 ADC (对应 LL_ADC_Enable 和等待)
+  // if (HAL_ADC_Start(&hadc1) != HAL_OK)
+  // {
+  //   /* 启动错误处理 */
+  //   Error_Handler();
+  // }
   /* USER CODE END ADC1_Init 2 */
 
 }
