@@ -217,6 +217,10 @@ void VELIX_TIMER_PERIOD_CALLBACK(Velix_TimerHandle *timer)
             Key_Scan(&key_1);
         }
         // ... 其他任务同理
+
+        if ((task_counter % 100) == 0) {
+            __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, Mt.cmd.speed);
+        }
     }
 }
 //1
