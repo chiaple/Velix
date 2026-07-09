@@ -218,7 +218,7 @@ typedef TIM_HandleTypeDef Velix_TimerHandle;
 //=============================无感/HFI默认参数==============================
 #define SENSORLESS_STRONG_DRAG_UD_DEFAULT               2.0f        // 开环强拖时施加的 d 轴电压
 #define SENSORLESS_STRONG_DRAG_CURRENT_D_DEFAULT        2.0f        // 电流闭环强拖时 d 轴给定
-#define SENSORLESS_STRONG_DRAG_ELEC_RPM_DEFAULT         2000        // 强拖电角速度设定 RPM
+#define SENSORLESS_STRONG_DRAG_ELEC_RPM_DEFAULT         100        // 强拖电角速度设定 RPM
 #define SENSORLESS_STRONG_DRAG_MECH_RPM_DEFAULT         300         // 强拖机械速度设定 RPM
 #define SENSORLESS_STRONG_DRAG_ALIGN_CURRENT_D_DEFAULT  4.0f        // 滑膜切换前 d 轴强拖电流
 #define SENSORLESS_SWITCH_MECH_RPM_BASE_DEFAULT         1000        // 强拖切观测器速度门限基准值，实际按极对数换算
