@@ -148,6 +148,10 @@ void System_Init(void){
 
 void System_Loop(void){
 
+    //母线电压采样
+    Sample_UpdateBusVoltage(&Mt.sample);
+    Mt.foc.U_bus = Mt.sample.BusReal;
+
     //串口指令处理
     Serial_ParseCommand();
 
@@ -156,6 +160,7 @@ void System_Loop(void){
 #if VELIX_COMM_UART_PORT == 3
     if (vofa_send_flag != 0U) {
         vofa_send_flag = 0U;
+        Calculate_Phase_Current(&Mt.sample, &Mt.foc);
         VOFA_SendByMode(&Mt);
     }
 #endif
@@ -218,9 +223,9 @@ void VELIX_TIMER_PERIOD_CALLBACK(Velix_TimerHandle *timer)
         }
         // ... 其他任务同理
 
-        if ((task_counter % 100) == 0) {
-            __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, Mt.cmd.speed);
-        }
+        // if ((task_counter % 100) == 0) {
+        //     __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, Mt.cmd.speed);
+        // }
     }
 }
 //1

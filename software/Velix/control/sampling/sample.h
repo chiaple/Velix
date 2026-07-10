@@ -32,5 +32,6 @@ typedef struct
 
 void CalibrateCurrentOffset(SAMPLE_STRUCT *sample);
 void Calculate_Phase_Current(SAMPLE_STRUCT *sample, FOC_STRUCT *foc);
+void Sample_UpdateBusVoltage(SAMPLE_STRUCT *sample);
 
 #endif //SPIN_MASTER_V2_SAMPLE_H

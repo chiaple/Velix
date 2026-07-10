@@ -45,7 +45,6 @@
 #define VELIX_ADC_INSTANCE              ADC1
 #define VELIX_ADC_IU_RANK               ADC_INJECTED_RANK_1
 #define VELIX_ADC_IV_RANK               ADC_INJECTED_RANK_2
-#define VELIX_ADC_IW_RANK               ADC_INJECTED_RANK_3
 
 #define VELIX_COMM_UART_PORT            3
 #define VELIX_COMM_UART_HANDLE          huart3
@@ -104,6 +103,9 @@ typedef TIM_HandleTypeDef Velix_TimerHandle;
 
 #define VELIX_ADC_READ_REG12() \
     HAL_ADC_GetValue(&VELIX_ADC_HANDLE)
+
+#define VELIX_ADC_STOP_REG_CONVERSION() \
+    HAL_ADC_Stop(&VELIX_ADC_HANDLE)
 
 #define VELIX_ADC_READ_INJ12(rank) \
     HAL_ADCEx_InjectedGetValue(&VELIX_ADC_HANDLE, (rank))
@@ -169,7 +171,7 @@ typedef TIM_HandleTypeDef Velix_TimerHandle;
 #define Velix_UartStartDmaTx(uart, data, bytes) \
     HAL_UART_Transmit_DMA((uart), (uint8_t *)(data), (bytes))
 
-#define   Udc                               20.0f               //母线电压
+#define   Udc                               30.0f               //母线电压
 #define _1_SQRT3 		                    0.57735027f         // 1/√3
 #define VELIX_PWM_PERIOD_TICKS              4249
 
@@ -220,7 +222,7 @@ typedef TIM_HandleTypeDef Velix_TimerHandle;
 #define SENSORLESS_STRONG_DRAG_CURRENT_D_DEFAULT        2.0f        // 电流闭环强拖时 d 轴给定
 #define SENSORLESS_STRONG_DRAG_ELEC_RPM_DEFAULT         100        // 强拖电角速度设定 RPM
 #define SENSORLESS_STRONG_DRAG_MECH_RPM_DEFAULT         300         // 强拖机械速度设定 RPM
-#define SENSORLESS_STRONG_DRAG_ALIGN_CURRENT_D_DEFAULT  4.0f        // 滑膜切换前 d 轴强拖电流
+#define SENSORLESS_STRONG_DRAG_ALIGN_CURRENT_D_DEFAULT  6.0f        // 滑膜切换前 d 轴强拖电流
 #define SENSORLESS_SWITCH_MECH_RPM_BASE_DEFAULT         1000        // 强拖切观测器速度门限基准值，实际按极对数换算
 #define SENSORLESS_COMPARE_ANGLE_MIN_RAD_DEFAULT        0.767f      // 观测角比较有效区间下限
 #define SENSORLESS_COMPARE_ANGLE_MAX_RAD_DEFAULT        5.370f      // 观测角比较有效区间上限

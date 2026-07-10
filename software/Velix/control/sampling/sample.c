@@ -25,7 +25,6 @@ void CalibrateCurrentOffset(SAMPLE_STRUCT *sample)
 
     uint32_t iu_sum = 0;
     uint32_t iv_sum = 0;
-    uint32_t iw_sum = 0;
     uint32_t valid_samples = 0;
 
     VELIX_PWM_SET_ADC_TRIGGER(4000);
@@ -41,7 +40,6 @@ void CalibrateCurrentOffset(SAMPLE_STRUCT *sample)
 
         iu_sum += VELIX_ADC_READ_INJ12(VELIX_ADC_IU_RANK);
         iv_sum += VELIX_ADC_READ_INJ12(VELIX_ADC_IV_RANK);
-        iw_sum += VELIX_ADC_READ_INJ12(VELIX_ADC_IW_RANK);
         valid_samples++;
     }
 
@@ -53,9 +51,24 @@ void CalibrateCurrentOffset(SAMPLE_STRUCT *sample)
 
     sample->IuOffset = (uint16_t)(iu_sum / valid_samples);
     sample->IvOffset = (uint16_t)(iv_sum / valid_samples);
-    sample->IwOffset = (uint16_t)(iw_sum / valid_samples);
 
     Velix_DelayMs(100);
+}
+
+void Sample_UpdateBusVoltage(SAMPLE_STRUCT *sample)
+{
+    if (sample == NULL) {
+        return;
+    }
+
+    if (VELIX_ADC_START_REG_CONVERSION() != VELIX_OK) {
+        return;
+    }
+
+    if (VELIX_ADC_REG_EOC()) {
+        sample->BusRaw = VELIX_ADC_READ_REG12();
+        sample->BusReal = ADC_VREF * ((float32_t)sample->BusRaw / ADC_RESOLUTION) * 22.27f;
+    }
 }
 
 /**
@@ -65,12 +78,10 @@ void CalibrateCurrentOffset(SAMPLE_STRUCT *sample)
 void Calculate_Phase_Current(SAMPLE_STRUCT *sample, FOC_STRUCT *foc){
     sample->IuRaw = VELIX_ADC_READ_INJ12(VELIX_ADC_IU_RANK);
     sample->IvRaw = VELIX_ADC_READ_INJ12(VELIX_ADC_IV_RANK);
-    sample->BusRaw = VELIX_ADC_READ_INJ12(VELIX_ADC_IW_RANK);
 
     //三相电压
     const float32_t u_1 = ADC_VREF * ((float32_t)(sample->IuRaw - sample->IuOffset) / ADC_RESOLUTION);
     const float32_t u_2 = ADC_VREF * ((float32_t)(sample->IvRaw - sample->IvOffset) / ADC_RESOLUTION);
-    sample->BusReal = ADC_VREF * ((float32_t)sample->BusRaw / ADC_RESOLUTION) * 22.27f;
     //三相电流
 //    p->IuReal = u_1 / (SAMPLING_RESITOR * MAGNIFICATION);
 //    p->IvReal = u_2 / (SAMPLING_RESITOR * MAGNIFICATION);
