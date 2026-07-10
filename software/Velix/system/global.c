@@ -202,6 +202,13 @@ void VELIX_ADC_INJECTED_CALLBACK(Velix_AdcHandle *adc)
     if (Velix_IsCurrentAdc(adc))
     {
         FOC_Loop(&Mt);
+
+        static uint8_t vofa_foc_div = 0U;
+        vofa_foc_div++;
+        if (vofa_foc_div >= VOFA_SEND_DIV_DEFAULT) {
+            vofa_foc_div = 0U;
+            vofa_send_flag = 1U;
+        }
     }
 }
 
@@ -216,12 +223,6 @@ void VELIX_TIMER_PERIOD_CALLBACK(Velix_TimerHandle *timer)
         // 执行任务
         UpdateTransitionTarget(&Mt.cmd.speed, Mt.cmd.fSpeed, CMD_SPEED_TRANSITION_RATE_DEFAULT);
         UpdateTransitionTarget(&Mt.cmd.position, Mt.cmd.fPosition, CMD_POSITION_TRANSITION_RATE_DEFAULT);
-        static uint8_t log_cnt = 0U;
-        log_cnt++;
-        if(log_cnt >= VOFA_SEND_DIV_DEFAULT){
-            log_cnt = 0U;
-            vofa_send_flag = 1U;
-        }
         LED_Tick_1ms();
 
         if ((task_counter % 10) == 0) {

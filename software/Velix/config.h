@@ -221,7 +221,7 @@ typedef TIM_HandleTypeDef Velix_TimerHandle;
 
 #define CMD_SPEED_TRANSITION_RATE_DEFAULT   0.005f      // 速度目标渐变系数
 #define CMD_POSITION_TRANSITION_RATE_DEFAULT 0.01f       // 位置目标渐变系数
-#define VOFA_SEND_DIV_DEFAULT               2U          // VOFA 发送分频，每 N 次 FOC 发送一次
+#define VOFA_SEND_DIV_DEFAULT               10U         // VOFA 发送分频，每 N 次 FOC 快环发送一次
 
 //=============================无感/HFI默认参数==============================
 #define SENSORLESS_STRONG_DRAG_UD_DEFAULT               2.0f        // 开环强拖时施加的 d 轴电压
