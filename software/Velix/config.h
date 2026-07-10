@@ -107,6 +107,12 @@ typedef TIM_HandleTypeDef Velix_TimerHandle;
 #define VELIX_ADC_STOP_REG_CONVERSION() \
     HAL_ADC_Stop(&VELIX_ADC_HANDLE)
 
+#define VELIX_ADC_START_REG_DMA(buffer, count) \
+    HAL_ADC_Start_DMA(&VELIX_ADC_HANDLE, (uint32_t *)(buffer), (count))
+
+#define VELIX_ADC_DISABLE_REG_DMA_XFER_IRQ() \
+    __HAL_DMA_DISABLE_IT(VELIX_ADC_HANDLE.DMA_Handle, DMA_IT_HT | DMA_IT_TC)
+
 #define VELIX_ADC_READ_INJ12(rank) \
     HAL_ADCEx_InjectedGetValue(&VELIX_ADC_HANDLE, (rank))
 

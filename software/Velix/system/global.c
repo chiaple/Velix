@@ -131,6 +131,12 @@ void System_Init(void){
     //电流校准
     CalibrateCurrentOffset(&Mt.sample);
 
+    // 母线电压规则组使用 ADC DMA 循环采样
+    if (VELIX_ADC_START_REG_DMA(Mt.sample.AdcBuff, 1U) != VELIX_OK) {
+        Velix_ErrorHandler();
+    }
+    VELIX_ADC_DISABLE_REG_DMA_XFER_IRQ();
+
     //次要任务
     Velix_TaskTimerStartInterrupt();
 

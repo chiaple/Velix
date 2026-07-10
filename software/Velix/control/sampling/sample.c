@@ -61,14 +61,8 @@ void Sample_UpdateBusVoltage(SAMPLE_STRUCT *sample)
         return;
     }
 
-    if (VELIX_ADC_START_REG_CONVERSION() != VELIX_OK) {
-        return;
-    }
-
-    if (VELIX_ADC_REG_EOC()) {
-        sample->BusRaw = VELIX_ADC_READ_REG12();
-        sample->BusReal = ADC_VREF * ((float32_t)sample->BusRaw / ADC_RESOLUTION) * 22.27f;
-    }
+    sample->BusRaw = sample->AdcBuff[0];
+    sample->BusReal = ADC_VREF * ((float32_t)sample->BusRaw / ADC_RESOLUTION) * 22.27f;
 }
 
 /**
