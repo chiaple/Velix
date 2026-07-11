@@ -67,6 +67,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     Velix/service/comm/serial.c
     Velix/service/comm/serial_commands.c
     Velix/service/comm/vofa_profile.c
+    Velix/service/display/config_display.c
     Velix/service/indicator/key_actions.c
     Velix/service/indicator/led_task.c
     Velix/system/global.c
@@ -87,6 +88,7 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     Velix/model
     Velix/service/audio
     Velix/service/comm
+    Velix/service/display
     Velix/service/indicator
     Velix/system
 )

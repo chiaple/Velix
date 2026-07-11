@@ -23,6 +23,7 @@
 #define VELIX_KEY1_Pin                  key1_Pin
 #define VELIX_KEY2_GPIO_Port            key2_GPIO_Port
 #define VELIX_KEY2_Pin                  key2_Pin
+#define VELIX_KEY_PRESSED_LEVEL         0U
 
 #define VELIX_LED_R_GPIO_Port           LED_R_GPIO_Port
 #define VELIX_LED_R_Pin                 LED_R_Pin
@@ -240,6 +241,8 @@ typedef TIM_HandleTypeDef Velix_TimerHandle;
 #define ROTARY_DIRECTION_DEFAULT            1           // 旋钮方向，1 保持当前方向，-1 反向
 #define ROTARY_SPEED_MIN_DEFAULT            (-4000.0f)  // 旋钮速度目标下限 RPM
 #define ROTARY_SPEED_MAX_DEFAULT            4000.0f     // 旋钮速度目标上限 RPM
+#define CONFIG_DISPLAY_REFRESH_MS_DEFAULT   30U         // 停机配置界面刷新周期 ms
+#define CONFIG_MENU_COUNTS_PER_STEP_DEFAULT 4           // 旋钮多少个计数移动一个菜单项
 
 //=============================无感/HFI默认参数==============================
 #define SENSORLESS_STRONG_DRAG_UD_DEFAULT               2.0f        // 开环强拖时施加的 d 轴电压

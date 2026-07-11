@@ -12,6 +12,17 @@ uint16_t DMA_MIN_SIZE = 16;
 uint16_t disp_buf[ST7789_WIDTH * HOR_LEN];
 #endif
 
+static void ST7789_FillByteBuffer(uint8_t *buffer, uint32_t pixels, uint16_t color)
+{
+	uint8_t hi = (uint8_t)(color >> 8);
+	uint8_t lo = (uint8_t)(color & 0xFF);
+
+	for (uint32_t i = 0; i < pixels; i++) {
+		buffer[(i * 2U)] = hi;
+		buffer[(i * 2U) + 1U] = lo;
+	}
+}
+
 /**
  * @brief Write command to ST7789 controller
  * @param cmd -> command to write
@@ -255,13 +266,26 @@ void ST7789_Fill(uint16_t xSta, uint16_t ySta, uint16_t xEnd, uint16_t yEnd, uin
 	if ((xEnd < 0) || (xEnd >= ST7789_WIDTH) ||
 		 (yEnd < 0) || (yEnd >= ST7789_HEIGHT))	return;
 	ST7789_Select();
-	uint16_t i, j;
 	ST7789_SetAddressWindow(xSta, ySta, xEnd, yEnd);
-	for (i = ySta; i <= yEnd; i++)
-		for (j = xSta; j <= xEnd; j++) {
-			uint8_t data[] = {color >> 8, color & 0xFF};
-			ST7789_WriteData(data, sizeof(data));
-		}
+	uint32_t pixels_left = (uint32_t)(xEnd - xSta + 1U) * (uint32_t)(yEnd - ySta + 1U);
+
+#ifdef USE_DMA
+	const uint32_t chunk_pixels_max = (uint32_t)(sizeof(disp_buf) / sizeof(disp_buf[0]));
+	uint8_t *buffer = (uint8_t *)disp_buf;
+
+	while (pixels_left > 0U) {
+		uint32_t chunk_pixels = (pixels_left > chunk_pixels_max) ? chunk_pixels_max : pixels_left;
+		ST7789_FillByteBuffer(buffer, chunk_pixels, color);
+		ST7789_WriteData(buffer, chunk_pixels * 2U);
+		pixels_left -= chunk_pixels;
+	}
+#else
+	while (pixels_left > 0U) {
+		uint8_t data[] = {color >> 8, color & 0xFF};
+		ST7789_WriteData(data, sizeof(data));
+		pixels_left--;
+	}
+#endif
 	ST7789_UnSelect();
 }
 
@@ -448,23 +472,42 @@ void ST7789_InvertColors(uint8_t invert)
 void ST7789_WriteChar(uint16_t x, uint16_t y, char ch, FontDef font, uint16_t color, uint16_t bgcolor)
 {
 	uint32_t i, b, j;
-	ST7789_Select();
-	ST7789_SetAddressWindow(x, y, x + font.width - 1, y + font.height - 1);
+
+	if ((x >= ST7789_WIDTH) || (y >= ST7789_HEIGHT)) {
+		return;
+	}
+	if ((x + font.width - 1U) >= ST7789_WIDTH ||
+		(y + font.height - 1U) >= ST7789_HEIGHT) {
+		return;
+	}
+
+	uint8_t char_buf[16U * 26U * 2U];
+	if (((uint32_t)font.width * (uint32_t)font.height * 2U) > sizeof(char_buf)) {
+		return;
+	}
+
+	uint32_t out = 0U;
+	const uint8_t color_hi = (uint8_t)(color >> 8);
+	const uint8_t color_lo = (uint8_t)(color & 0xFF);
+	const uint8_t bg_hi = (uint8_t)(bgcolor >> 8);
+	const uint8_t bg_lo = (uint8_t)(bgcolor & 0xFF);
 
 	for (i = 0; i < font.height; i++) {
 		b = font.data[(ch - 32) * font.height + i];
 		for (j = 0; j < font.width; j++) {
 			if ((b << j) & 0x8000) {
-				uint8_t data[] = {color >> 8, color & 0xFF};
-				ST7789_WriteData(data, sizeof(data));
+				char_buf[out++] = color_hi;
+				char_buf[out++] = color_lo;
 			}
 			else {
-				uint8_t data[] = {bgcolor >> 8, bgcolor & 0xFF};
-				ST7789_WriteData(data, sizeof(data));
+				char_buf[out++] = bg_hi;
+				char_buf[out++] = bg_lo;
 			}
 		}
 	}
-	ST7789_UnSelect();
+
+	ST7789_SetAddressWindow(x, y, x + font.width - 1, y + font.height - 1);
+	ST7789_WriteData(char_buf, out);
 }
 
 /** 
@@ -478,7 +521,6 @@ void ST7789_WriteChar(uint16_t x, uint16_t y, char ch, FontDef font, uint16_t co
  */
 void ST7789_WriteString(uint16_t x, uint16_t y, const char *str, FontDef font, uint16_t color, uint16_t bgcolor)
 {
-	ST7789_Select();
 	while (*str) {
 		if (x + font.width >= ST7789_WIDTH) {
 			x = 0;
@@ -497,7 +539,6 @@ void ST7789_WriteString(uint16_t x, uint16_t y, const char *str, FontDef font, u
 		x += font.width;
 		str++;
 	}
-	ST7789_UnSelect();
 }
 
 /** 

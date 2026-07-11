@@ -6,7 +6,6 @@
 #include "global.h"
 
 #include "key.h"
-#include "key_actions.h"
 #include "rotary_encoder.h"
 #include "serial.h"
 #include "FOC.h"
@@ -17,6 +16,7 @@
 #include "motor_stop.h"
 #include "motor_tone.h"
 #include "vofa_profile.h"
+#include "config_display.h"
 
 volatile uint32_t sys_tick_ms = 0;          // 每1ms +1
 volatile uint32_t task_counter = 0;         // 用于分频
@@ -40,6 +40,10 @@ static float ClampFloat(float value, float min_value, float max_value)
 
 static void ApplyRotarySpeedCommand(void)
 {
+    if (Mt.cmd.state == MOTOR_STOP) {
+        return;
+    }
+
     float speed_per_count = ROTARY_SPEED_PER_REV_DEFAULT / ROTARY_COUNTS_PER_REV_DEFAULT;
     float speed_target = (float)RotaryEncoder_GetPosition() * speed_per_count;
     Mt.cmd.fSpeed = ClampFloat(speed_target,
@@ -69,6 +73,7 @@ void System_Init(void){
         Velix_ErrorHandler();
     }   
     VOFA_Init();
+    ConfigDisplay_Init();
 
     MotorCommand_Init(&Mt.cmd);//上电状态
 
@@ -185,7 +190,8 @@ void System_Loop(void){
     Serial_ParseCommand();
 
     //按鍵处理
-    Key_Handler(&key_1, SingleClickAction, DoubleClickAction, LongPressAction);
+    ConfigDisplay_HandleKey(&Mt, key_GetEvent(&key_1), key_GetEvent(&key_2));
+    ConfigDisplay_Task(&Mt);
 #if VELIX_COMM_UART_PORT == 3
     if (vofa_send_flag != 0U) {
         vofa_send_flag = 0U;

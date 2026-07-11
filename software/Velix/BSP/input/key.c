@@ -21,7 +21,8 @@ void Key_Init(Key* key, Velix_GpioPort* GPIOx, uint16_t GPIO_Pin){
 //按键扫描
 void Key_Scan(Key* key){
 
-    bool current = (VELIX_GPIO_IS_SET(key->GPIOx, key->GPIO_Pin) != 1);//低电平按下
+    bool current =
+        (VELIX_GPIO_IS_SET(key->GPIOx, key->GPIO_Pin) == VELIX_KEY_PRESSED_LEVEL);
 
     if(current){
         //按下
