@@ -22,6 +22,7 @@ static uint8_t s_screen_drawn = 0U;
 static uint8_t s_run_page_drawn = 0U;
 static uint8_t s_identify_page_drawn = 0U;
 static uint8_t s_wait_sensorless_identify = 0U;
+static uint8_t s_page_clear_started = 0U;
 static uint32_t s_last_refresh_ms = 0U;
 static int8_t s_last_menu_index = -1;
 static int32_t s_scroll_offset = 0;
@@ -105,6 +106,7 @@ static void EnterMenuPage(ConfigMenuPage page)
     s_screen_drawn = 0U;
     s_run_page_drawn = 0U;
     s_identify_page_drawn = 0U;
+    s_page_clear_started = 0U;
     s_last_menu_index = -1;
     s_scroll_offset = 0;
     RotaryEncoder_ResetPosition();
@@ -130,6 +132,7 @@ static void StartSensorlessIdentify(MotorSystem *motor)
     s_screen_drawn = 0U;
     s_run_page_drawn = 0U;
     s_identify_page_drawn = 0U;
+    s_page_clear_started = 0U;
     s_last_refresh_ms = 0U;
 
     LED_SetState(LED_COLOR_CYAN, LED_MODE_CUSTOM_BLINK, 100, 100, 3, 900);
@@ -195,6 +198,7 @@ static void StopMotorFromMenu(MotorSystem *motor)
     s_screen_drawn = 0U;
     s_run_page_drawn = 0U;
     s_identify_page_drawn = 0U;
+    s_page_clear_started = 0U;
     s_last_menu_index = -1;
     s_scroll_offset = 0;
     s_menu_page = MENU_PAGE_MAIN;
@@ -234,7 +238,6 @@ static void DrawMenuRow(uint8_t row, int32_t item_index, uint8_t selected)
 
 static void DrawStaticPage(void)
 {
-    ST7789_Fill_Color(BLACK);
     ST7789_WriteString(10, 8,
                        (s_menu_page == MENU_PAGE_SENSORLESS) ? "Sensorless" : "Velix Menu",
                        Font_16x26, GREEN, BLACK);
@@ -292,7 +295,6 @@ static void DrawRunValue(uint16_t y, const char *value)
 
 static void DrawRunPageStatic(void)
 {
-    ST7789_Fill_Color(BLACK);
     ST7789_WriteString(10, 8, "Velix Run", Font_16x26, GREEN, BLACK);
     ST7789_DrawLine(10, 38, ST7789_WIDTH - 10, 38, GRAY);
 
@@ -325,7 +327,6 @@ static void DrawRunPageValues(const MotorSystem *motor)
 
 static void DrawIdentifyPageStatic(void)
 {
-    ST7789_Fill_Color(BLACK);
     ST7789_WriteString(10, 8, "Sensorless", Font_16x26, GREEN, BLACK);
     ST7789_DrawLine(10, 38, ST7789_WIDTH - 10, 38, GRAY);
 
@@ -353,6 +354,7 @@ void ConfigDisplay_Init(void)
     s_run_page_drawn = 0U;
     s_identify_page_drawn = 0U;
     s_wait_sensorless_identify = 0U;
+    s_page_clear_started = 0U;
     s_last_refresh_ms = 0U;
     s_last_menu_index = -1;
     s_scroll_offset = 0;
@@ -362,6 +364,11 @@ void ConfigDisplay_Init(void)
 void ConfigDisplay_Task(MotorSystem *motor)
 {
     if (motor == NULL) {
+        return;
+    }
+
+    ST7789_Task();
+    if (ST7789_IsBusy() != 0U) {
         return;
     }
 
@@ -381,6 +388,12 @@ void ConfigDisplay_Task(MotorSystem *motor)
         s_screen_drawn = 0U;
         s_run_page_drawn = 0U;
         if (s_identify_page_drawn == 0U) {
+            if (s_page_clear_started == 0U) {
+                ST7789_Fill_Color(BLACK);
+                s_page_clear_started = 1U;
+                return;
+            }
+            s_page_clear_started = 0U;
             DrawIdentifyPageStatic();
             s_identify_page_drawn = 1U;
             s_last_refresh_ms = 0U;
@@ -400,6 +413,12 @@ void ConfigDisplay_Task(MotorSystem *motor)
         s_last_menu_index = -1;
         s_scroll_offset = 0;
         if (s_run_page_drawn == 0U) {
+            if (s_page_clear_started == 0U) {
+                ST7789_Fill_Color(BLACK);
+                s_page_clear_started = 1U;
+                return;
+            }
+            s_page_clear_started = 0U;
             DrawRunPageStatic();
             s_run_page_drawn = 1U;
             s_last_refresh_ms = 0U;
@@ -417,6 +436,12 @@ void ConfigDisplay_Task(MotorSystem *motor)
     s_identify_page_drawn = 0U;
 
     if (s_screen_drawn == 0U) {
+        if (s_page_clear_started == 0U) {
+            ST7789_Fill_Color(BLACK);
+            s_page_clear_started = 1U;
+            return;
+        }
+        s_page_clear_started = 0U;
         DrawStaticPage();
         s_screen_drawn = 1U;
         s_last_refresh_ms = 0U;

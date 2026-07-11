@@ -10,6 +10,10 @@ uint16_t DMA_MIN_SIZE = 16;
  */
  #define HOR_LEN 	5	//	Also mind the resolution of your screen!
 uint16_t disp_buf[ST7789_WIDTH * HOR_LEN];
+static volatile uint8_t st7789_fill_active = 0U;
+static volatile uint8_t st7789_dma_in_progress = 0U;
+static uint32_t st7789_fill_pixels_left = 0U;
+static uint16_t st7789_fill_color = BLACK;
 #endif
 
 static void ST7789_FillByteBuffer(uint8_t *buffer, uint32_t pixels, uint16_t color)
@@ -22,6 +26,63 @@ static void ST7789_FillByteBuffer(uint8_t *buffer, uint32_t pixels, uint16_t col
 		buffer[(i * 2U) + 1U] = lo;
 	}
 }
+
+#ifdef USE_DMA
+static void ST7789_FillDmaPump(void)
+{
+	if ((st7789_fill_active == 0U) || (st7789_dma_in_progress != 0U)) {
+		return;
+	}
+
+	if (st7789_fill_pixels_left == 0U) {
+		ST7789_UnSelect();
+		st7789_fill_active = 0U;
+		return;
+	}
+
+	const uint32_t chunk_pixels_max = (uint32_t)(sizeof(disp_buf) / 2U);
+	const uint32_t chunk_pixels = (st7789_fill_pixels_left > chunk_pixels_max)
+	                                  ? chunk_pixels_max
+	                                  : st7789_fill_pixels_left;
+
+	ST7789_FillByteBuffer((uint8_t *)disp_buf, chunk_pixels, st7789_fill_color);
+
+	if (HAL_SPI_Transmit_DMA(&ST7789_SPI_PORT, (uint8_t *)disp_buf, (uint16_t)(chunk_pixels * 2U)) == HAL_OK) {
+		st7789_dma_in_progress = 1U;
+		st7789_fill_pixels_left -= chunk_pixels;
+	} else {
+		ST7789_UnSelect();
+		st7789_dma_in_progress = 0U;
+		st7789_fill_active = 0U;
+	}
+}
+
+uint8_t ST7789_IsBusy(void)
+{
+	return (st7789_fill_active != 0U) || (st7789_dma_in_progress != 0U);
+}
+
+void ST7789_Task(void)
+{
+	ST7789_FillDmaPump();
+}
+
+void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi)
+{
+	if (hspi->Instance == ST7789_SPI_PORT.Instance) {
+		st7789_dma_in_progress = 0U;
+	}
+}
+#else
+uint8_t ST7789_IsBusy(void)
+{
+	return 0U;
+}
+
+void ST7789_Task(void)
+{
+}
+#endif
 
 /**
  * @brief Write command to ST7789 controller
@@ -51,18 +112,7 @@ static void ST7789_WriteData(uint8_t *buff, size_t buff_size)
 
 	while (buff_size > 0) {
 		uint16_t chunk_size = buff_size > 65535 ? 65535 : buff_size;
-		#ifdef USE_DMA
-			if (DMA_MIN_SIZE <= buff_size)
-			{
-				HAL_SPI_Transmit_DMA(&ST7789_SPI_PORT, buff, chunk_size);
-				while (ST7789_SPI_PORT.hdmatx->State != HAL_DMA_STATE_READY)
-				{}
-			}
-			else
-				HAL_SPI_Transmit(&ST7789_SPI_PORT, buff, chunk_size, HAL_MAX_DELAY);
-		#else
-			HAL_SPI_Transmit(&ST7789_SPI_PORT, buff, chunk_size, HAL_MAX_DELAY);
-		#endif
+		HAL_SPI_Transmit(&ST7789_SPI_PORT, buff, chunk_size, HAL_MAX_DELAY);
 		buff += chunk_size;
 		buff_size -= chunk_size;
 	}
@@ -214,6 +264,10 @@ void ST7789_Init(void)
  */
 void ST7789_Fill_Color(uint16_t color)
 {
+	if (ST7789_IsBusy() != 0U) {
+		return;
+	}
+
 	const uint16_t y_margin = (Y_SHIFT > ST7789_FULL_CLEAR_MARGIN) ? ST7789_FULL_CLEAR_MARGIN : Y_SHIFT;
 	const uint16_t x_start = X_SHIFT;
 	const uint16_t y_start = Y_SHIFT - y_margin;
@@ -225,23 +279,20 @@ void ST7789_Fill_Color(uint16_t color)
 	ST7789_Select();
 
 	#ifdef USE_DMA
-		const uint32_t chunk_pixels_max = (uint32_t)(sizeof(disp_buf) / sizeof(disp_buf[0]));
-		uint8_t *buffer = (uint8_t *)disp_buf;
-
-		while (pixels_left > 0U) {
-			uint32_t chunk_pixels = (pixels_left > chunk_pixels_max) ? chunk_pixels_max : pixels_left;
-			ST7789_FillByteBuffer(buffer, chunk_pixels, color);
-			ST7789_WriteData(buffer, chunk_pixels * 2U);
-			pixels_left -= chunk_pixels;
-		}
+		ST7789_DC_Set();
+		st7789_fill_color = color;
+		st7789_fill_pixels_left = pixels_left;
+		st7789_fill_active = 1U;
+		st7789_dma_in_progress = 0U;
+		ST7789_FillDmaPump();
 	#else
 		while (pixels_left > 0U) {
 			uint8_t data[] = {color >> 8, color & 0xFF};
 			ST7789_WriteData(data, sizeof(data));
 			pixels_left--;
 		}
+		ST7789_UnSelect();
 	#endif
-	ST7789_UnSelect();
 }
 
 /**
