@@ -13,8 +13,8 @@ void VOFA_SendByMode(const MotorSystem *p)
         return;
     }
 
-    VOFA_SendChannels(p->foc.iu,
-                      p->foc.iv,
-                      p->foc.iw,
-                      p->sample.BusReal);
+    VOFA_SendChannels((float)p->sample.IuRaw,
+                      (float)p->sample.IvRaw,
+                      (float)p->sample.BusRaw,
+                      (float)(p->sample.IvRaw - (int32_t)p->sample.IvOffset));
 }
