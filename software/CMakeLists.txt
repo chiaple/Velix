@@ -49,6 +49,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     Velix/BSP/Display/ST7789/st7789.c
     Velix/BSP/ENCODER/MT6701/MT6701.c
     Velix/BSP/input/key.c
+    Velix/BSP/input/rotary_encoder.c
     Velix/control/algorithm/FOC.c
     Velix/control/algorithm/PID.c
     Velix/control/command/command.c

@@ -35,6 +35,10 @@
 #define VELIX_ENCODER_CS_GPIO_Port      Encoder_CS_GPIO_Port
 #define VELIX_ENCODER_CS_Pin            Encoder_CS_Pin
 
+#define VELIX_ROTARY_TIM                htim4
+#define VELIX_ROTARY_BUTTON_GPIO_Port   encoder_GPIO_Port
+#define VELIX_ROTARY_BUTTON_Pin         encoder_Pin
+
 #define VELIX_PWM_TIM                   htim1
 #define VELIX_PWM_U_CHANNEL             TIM_CHANNEL_1
 #define VELIX_PWM_V_CHANNEL             TIM_CHANNEL_2
@@ -82,6 +86,15 @@ typedef TIM_HandleTypeDef Velix_TimerHandle;
 
 #define VELIX_GPIO_IS_SET(port, pin) \
     LL_GPIO_IsInputPinSet((port), (pin))
+
+#define Velix_RotaryStart() \
+    HAL_TIM_Encoder_Start(&VELIX_ROTARY_TIM, TIM_CHANNEL_ALL)
+
+#define Velix_RotaryGetCounter() \
+    __HAL_TIM_GET_COUNTER(&VELIX_ROTARY_TIM)
+
+#define Velix_RotarySetCounter(value) \
+    __HAL_TIM_SET_COUNTER(&VELIX_ROTARY_TIM, (value))
 
 #define VELIX_PWM_SET_U(compare) \
     __HAL_TIM_SET_COMPARE(&VELIX_PWM_TIM, VELIX_PWM_U_CHANNEL, (compare))
@@ -222,6 +235,11 @@ typedef TIM_HandleTypeDef Velix_TimerHandle;
 #define CMD_SPEED_TRANSITION_RATE_DEFAULT   0.005f      // 速度目标渐变系数
 #define CMD_POSITION_TRANSITION_RATE_DEFAULT 0.01f       // 位置目标渐变系数
 #define VOFA_SEND_DIV_DEFAULT               10U         // VOFA 发送分频，每 N 次 FOC 快环发送一次
+#define ROTARY_COUNTS_PER_REV_DEFAULT       60.0f       // 旋钮转一整圈对应的编码器计数
+#define ROTARY_SPEED_PER_REV_DEFAULT        1000.0f      // 旋钮转一整圈对应的目标速度变化 RPM
+#define ROTARY_DIRECTION_DEFAULT            1           // 旋钮方向，1 保持当前方向，-1 反向
+#define ROTARY_SPEED_MIN_DEFAULT            (-4000.0f)  // 旋钮速度目标下限 RPM
+#define ROTARY_SPEED_MAX_DEFAULT            4000.0f     // 旋钮速度目标上限 RPM
 
 //=============================无感/HFI默认参数==============================
 #define SENSORLESS_STRONG_DRAG_UD_DEFAULT               2.0f        // 开环强拖时施加的 d 轴电压

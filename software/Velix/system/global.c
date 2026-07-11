@@ -7,6 +7,7 @@
 
 #include "key.h"
 #include "key_actions.h"
+#include "rotary_encoder.h"
 #include "serial.h"
 #include "FOC.h"
 #include "sensoruse.h"
@@ -25,6 +26,27 @@ MotorSystem Mt;
 
 
 char ad[20];
+
+static float ClampFloat(float value, float min_value, float max_value)
+{
+    if (value < min_value) {
+        return min_value;
+    }
+    if (value > max_value) {
+        return max_value;
+    }
+    return value;
+}
+
+static void ApplyRotarySpeedCommand(void)
+{
+    float speed_per_count = ROTARY_SPEED_PER_REV_DEFAULT / ROTARY_COUNTS_PER_REV_DEFAULT;
+    float speed_target = (float)RotaryEncoder_GetPosition() * speed_per_count;
+    Mt.cmd.fSpeed = ClampFloat(speed_target,
+                               ROTARY_SPEED_MIN_DEFAULT,
+                               ROTARY_SPEED_MAX_DEFAULT);
+}
+
 /**
   *
   *  系统初始化 （HAL）
@@ -40,6 +62,7 @@ void System_Init(void){
     /**按键初始化*/
     Key_Init(&key_1, VELIX_KEY1_GPIO_Port, VELIX_KEY1_Pin);
     Key_Init(&key_2, VELIX_KEY2_GPIO_Port, VELIX_KEY2_Pin);
+    RotaryEncoder_Init();
 
     // 通信串口 DMA 接收指令
     if (UART_DMA_Receive_Init(Serial_GetCommUart(), serial_dma_rx_buf, RX_BUF_SIZE) != VELIX_OK) {
@@ -220,6 +243,9 @@ void VELIX_TIMER_PERIOD_CALLBACK(Velix_TimerHandle *timer)
         sys_tick_ms++;
         task_counter++;
 
+        RotaryEncoder_Update();
+        ApplyRotarySpeedCommand();
+
         // 执行任务
         UpdateTransitionTarget(&Mt.cmd.speed, Mt.cmd.fSpeed, CMD_SPEED_TRANSITION_RATE_DEFAULT);
         UpdateTransitionTarget(&Mt.cmd.position, Mt.cmd.fPosition, CMD_POSITION_TRANSITION_RATE_DEFAULT);
@@ -227,6 +253,7 @@ void VELIX_TIMER_PERIOD_CALLBACK(Velix_TimerHandle *timer)
 
         if ((task_counter % 10) == 0) {
             Key_Scan(&key_1);
+            Key_Scan(&key_2);
         }
         // ... 其他任务同理
 
