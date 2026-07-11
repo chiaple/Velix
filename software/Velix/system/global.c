@@ -20,7 +20,6 @@
 
 volatile uint32_t sys_tick_ms = 0;          // 每1ms +1
 volatile uint32_t task_counter = 0;         // 用于分频
-static volatile uint8_t vofa_send_flag = 0;
 
 MotorSystem Mt;
 
@@ -192,13 +191,6 @@ void System_Loop(void){
     //按鍵处理
     ConfigDisplay_HandleKey(&Mt, key_GetEvent(&key_1), key_GetEvent(&key_2));
     ConfigDisplay_Task(&Mt);
-#if VELIX_COMM_UART_PORT == 3
-    if (vofa_send_flag != 0U) {
-        vofa_send_flag = 0U;
-        Calculate_Phase_Current(&Mt.sample, &Mt.foc);
-        VOFA_SendByMode(&Mt);
-    }
-#endif
 
 }
 void FOC_Loop(MotorSystem *p){
@@ -236,7 +228,7 @@ void VELIX_ADC_INJECTED_CALLBACK(Velix_AdcHandle *adc)
         vofa_foc_div++;
         if (vofa_foc_div >= VOFA_SEND_DIV_DEFAULT) {
             vofa_foc_div = 0U;
-            vofa_send_flag = 1U;
+            VOFA_SendByMode(&Mt);
         }
     }
 }

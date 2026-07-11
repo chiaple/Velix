@@ -4,7 +4,6 @@
 
 #include "vofa_profile.h"
 
-#include "rotary_encoder.h"
 #include "global.h"
 #include "serial.h"
 
@@ -14,8 +13,8 @@ void VOFA_SendByMode(const MotorSystem *p)
         return;
     }
 
-    VOFA_SendChannels((float)rotary_encoder.position,
-                      p->cmd.fSpeed,
-                      rotary_encoder.button_pressed ? 1.0f : 0.0f,
+    VOFA_SendChannels(p->foc.iu,
+                      p->foc.iv,
+                      p->foc.iw,
                       p->sample.BusReal);
 }
