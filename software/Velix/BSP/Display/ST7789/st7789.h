@@ -133,6 +133,11 @@ extern SPI_HandleTypeDef ST7789_SPI_PORT;
 
 #endif
 
+/* Some 1.9 inch ST7789 panels expose a tiny border outside the logical
+ * 320x170 area. Clear a few extra rows during full-screen wipes only.
+ */
+#define ST7789_FULL_CLEAR_MARGIN 2U
+
 /**
  *Color of pen
  *If you want to use another color, you can choose one in RGB565 format.

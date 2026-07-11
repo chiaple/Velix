@@ -82,6 +82,27 @@ static void ST7789_WriteSmallData(uint8_t data)
 	ST7789_UnSelect();
 }
 
+static void ST7789_SetRawAddressWindow(uint16_t x_start, uint16_t y_start,
+                                       uint16_t x_end, uint16_t y_end)
+{
+	ST7789_Select();
+
+	ST7789_WriteCommand(ST7789_CASET);
+	{
+		uint8_t data[] = {x_start >> 8, x_start & 0xFF, x_end >> 8, x_end & 0xFF};
+		ST7789_WriteData(data, sizeof(data));
+	}
+
+	ST7789_WriteCommand(ST7789_RASET);
+	{
+		uint8_t data[] = {y_start >> 8, y_start & 0xFF, y_end >> 8, y_end & 0xFF};
+		ST7789_WriteData(data, sizeof(data));
+	}
+
+	ST7789_WriteCommand(ST7789_RAMWR);
+	ST7789_UnSelect();
+}
+
 /**
  * @brief Set the rotation direction of the display
  * @param m -> rotation parameter(please refer it in st7789.h)
@@ -115,26 +136,10 @@ void ST7789_SetRotation(uint8_t m)
  */
 static void ST7789_SetAddressWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1)
 {
-	ST7789_Select();
 	uint16_t x_start = x0 + X_SHIFT, x_end = x1 + X_SHIFT;
 	uint16_t y_start = y0 + Y_SHIFT, y_end = y1 + Y_SHIFT;
-	
-	/* Column Address set */
-	ST7789_WriteCommand(ST7789_CASET); 
-	{
-		uint8_t data[] = {x_start >> 8, x_start & 0xFF, x_end >> 8, x_end & 0xFF};
-		ST7789_WriteData(data, sizeof(data));
-	}
 
-	/* Row Address set */
-	ST7789_WriteCommand(ST7789_RASET);
-	{
-		uint8_t data[] = {y_start >> 8, y_start & 0xFF, y_end >> 8, y_end & 0xFF};
-		ST7789_WriteData(data, sizeof(data));
-	}
-	/* Write to RAM */
-	ST7789_WriteCommand(ST7789_RAMWR);
-	ST7789_UnSelect();
+	ST7789_SetRawAddressWindow(x_start, y_start, x_end, y_end);
 }
 
 /**
@@ -209,29 +214,32 @@ void ST7789_Init(void)
  */
 void ST7789_Fill_Color(uint16_t color)
 {
-	uint16_t i;
-	ST7789_SetAddressWindow(0, 0, ST7789_WIDTH - 1, ST7789_HEIGHT - 1);
+	const uint16_t y_margin = (Y_SHIFT > ST7789_FULL_CLEAR_MARGIN) ? ST7789_FULL_CLEAR_MARGIN : Y_SHIFT;
+	const uint16_t x_start = X_SHIFT;
+	const uint16_t y_start = Y_SHIFT - y_margin;
+	const uint16_t x_end = X_SHIFT + ST7789_WIDTH - 1U;
+	const uint16_t y_end = Y_SHIFT + ST7789_HEIGHT + ST7789_FULL_CLEAR_MARGIN - 1U;
+	uint32_t pixels_left = (uint32_t)(x_end - x_start + 1U) * (uint32_t)(y_end - y_start + 1U);
+
+	ST7789_SetRawAddressWindow(x_start, y_start, x_end, y_end);
 	ST7789_Select();
 
 	#ifdef USE_DMA
-		for (i = 0; i < ST7789_HEIGHT / HOR_LEN; i++)
-		{
-			for (int i = 0; i < ST7789_WIDTH * HOR_LEN; i++) {
-				disp_buf[i] = color;
-			}
-			ST7789_WriteData((uint8_t *)disp_buf, sizeof(disp_buf));
-			/*上面四行修复下面两行
-			memset(disp_buf, color, sizeof(disp_buf));
-			ST7789_WriteData(disp_buf, sizeof(disp_buf));
-			*/
+		const uint32_t chunk_pixels_max = (uint32_t)(sizeof(disp_buf) / sizeof(disp_buf[0]));
+		uint8_t *buffer = (uint8_t *)disp_buf;
+
+		while (pixels_left > 0U) {
+			uint32_t chunk_pixels = (pixels_left > chunk_pixels_max) ? chunk_pixels_max : pixels_left;
+			ST7789_FillByteBuffer(buffer, chunk_pixels, color);
+			ST7789_WriteData(buffer, chunk_pixels * 2U);
+			pixels_left -= chunk_pixels;
 		}
 	#else
-		uint16_t j;
-		for (i = 0; i < ST7789_WIDTH; i++)
-				for (j = 0; j < ST7789_HEIGHT; j++) {
-					uint8_t data[] = {color >> 8, color & 0xFF};
-					ST7789_WriteData(data, sizeof(data));
-				}
+		while (pixels_left > 0U) {
+			uint8_t data[] = {color >> 8, color & 0xFF};
+			ST7789_WriteData(data, sizeof(data));
+			pixels_left--;
+		}
 	#endif
 	ST7789_UnSelect();
 }
